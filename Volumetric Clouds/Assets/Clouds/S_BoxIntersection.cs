@@ -1,6 +1,4 @@
-using System;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class BoxIntersection : MonoBehaviour
@@ -22,28 +20,26 @@ public class BoxIntersection : MonoBehaviour
     
     private Vector3 entryPosition = Vector3.zero;
     private Vector3 exitPosition = Vector3.zero;
-    private bool intersecting;
-
-    void Start()
-    {
-        
-    }
+    private Vector2 intersecting;
 
     void Update()
     {
-        entryPosition = boundingBox.position;
-        exitPosition = boundingBox.position + boundingBox.localScale / 2.0f;
 
         currentBounds = new Box(boundingBox.position, boundingBox.localScale);
 
         intersecting = RaycastIntersectBox(currentBounds, transform.position, transform.up);
+
+        entryPosition = transform.position + transform.up * intersecting.x;
+        exitPosition = transform.position + transform.up * intersecting.y;
     }
 
     void OnDrawGizmos()
     {
-        Gizmos.color = intersecting ? Color.green : Color.red;
+        Gizmos.color = Color.blue;
         Gizmos.DrawLine(transform.position, transform.position + transform.up * 3.0f);
+        Gizmos.color = Color.green;
         Gizmos.DrawSphere(entryPosition, 0.1f);
+        Gizmos.color = Color.red;
         Gizmos.DrawSphere(exitPosition, 0.1f);
     }
 
@@ -71,7 +67,8 @@ public class BoxIntersection : MonoBehaviour
     }
 
     // https://jcgt.org/published/0007/03/04/paper.pdf
-    bool RaycastIntersectBox(Box box, Vector3 rayPosition, Vector3 rayDir)
+    // x is distance to box, y is max distance trough box
+    Vector2 RaycastIntersectBox(Box box, Vector3 rayPosition, Vector3 rayDir)
     {
         Vector3 half = box.size * 0.5f;
         Vector3 bMin = box.position - half;
@@ -83,6 +80,6 @@ public class BoxIntersection : MonoBehaviour
         float3 tMin = Vec3Min(t0, t1);
         float3 tMax = Vec3Max(t0, t1);
 
-        return Mathf.Max(tMin.x, tMin.y, tMin.z) <= Mathf.Min(tMax.x, tMax.y, tMax.z);
+        return new Vector2(Mathf.Max(tMin.x, tMin.y, tMin.z), Mathf.Min(tMax.x, tMax.y, tMax.z));
     }
 }
