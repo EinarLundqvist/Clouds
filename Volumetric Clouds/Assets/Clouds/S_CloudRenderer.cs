@@ -15,6 +15,6 @@ public class S_CloudRenderer : MonoBehaviour
         boundsPosition = boundsBox.position;
 
         fullscreenPass.SetVector("boundsPosition", boundsPosition);
-        fullscreenPass.SetVector("boundsSize", boundsSize);
+        fullscreenPass.SetVector("boundsSize", boundsSize * 0.5f);
     }
 }
