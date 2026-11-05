@@ -49,11 +49,11 @@ Shader "Custom/SH_BoundingBox"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
-                float mask = saturate((abs(IN.uv.x - 0.5)) + abs(IN.uv.x - 0.5)) * color.a;
-                if (mask < 0.975)
+                float mask = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv).r;
+                if (mask < 0.1)
                     discard;
-                return float4(color.rgb, 1.0);
+
+                return float4(_BaseColor.rgb, 1.0);
             }
             ENDHLSL
         }

@@ -5,6 +5,8 @@ Shader "Custom/SH_Clouds"
         [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         _Scattering ("Scattering", Range(-1, 1)) = 0
+        _StepLength ("Step Length", Range(0.05, 5)) = 1
+        _MaxMarchDistance ("Max March Distance", float) = 50
     }
 
     SubShader
@@ -33,6 +35,8 @@ Shader "Custom/SH_Clouds"
                 half4 _BaseColor;
                 float4 _BaseMap_ST;
                 float _Scattering;
+                float _MaxMarchDistance;
+                float _StepLength;
             CBUFFER_END
 
             float max3(float m, float a, float x)
@@ -46,7 +50,7 @@ Shader "Custom/SH_Clouds"
 
             // https://jcgt.org/published/0007/03/04/paper.pdf
             // x is distance to box, y is max distance trough box
-            float RaycastIntersectBox(float3 boxPosition, float3 boxSize, float3 rayPosition, float3 rayDir)
+            float2 RaycastIntersectBox(float3 boxPosition, float3 boxSize, float3 rayPosition, float3 rayDir)
             {
                 float3 bMin = boxPosition - boxSize;
                 float3 bMax = boxPosition + boxSize;
@@ -65,9 +69,10 @@ Shader "Custom/SH_Clouds"
                 // to get distance between points we can disregard the rayorigin + raydir since its offset is equal for both
                 // and prevent the distance from dropping below 0, since nothing behind camera should be calculated.
                 float distanceWithinBox = max(0, maxDistanceToBox - minDistanceToBox);
+                float distanceToBox = max(0, minDistanceToBox);
 
                 // minDistanceToBox <= maxDistanceToBox means ray intersects with box
-                return distanceWithinBox;
+                return float2(distanceToBox, distanceWithinBox);
             }
 
             //                    1 - g^2                    θ is the original trajectory 
@@ -89,7 +94,16 @@ Shader "Custom/SH_Clouds"
 
             float SampleDensity(float3 worldPosition)
             {
-                return 1;
+                return 10;
+            }
+
+            //                                                                     transmittance ↓      ↓ density
+            // transmittance is light reaching camera that dosent get absorbed or scatterd away, T = e^-d.
+            // beer's law adapted from https://advances.realtimerendering.com/s2015/The%20Real-time%20Volumetric%20Cloudscapes%20of%20Horizon%20-%20Zero%20Dawn%20-%20ARTR.pdf
+            float BeersLambertLaw(float3 worldPosition)
+            {
+                float density = SampleDensity(worldPosition);
+                return exp(-density);
             }
 
             half4 frag(Varyings IN) : SV_Target
@@ -100,28 +114,39 @@ Shader "Custom/SH_Clouds"
                 float3 rayOrigin = GetCameraPositionWS();
                 float3 rayDir = normalize(WorldPos - rayOrigin);
 
-                float distanceWithinBox = RaycastIntersectBox(boundsPosition, boundsSize, rayOrigin, rayDir);
+                float2 intersect = RaycastIntersectBox(boundsPosition, boundsSize, rayOrigin, rayDir);
+                float distanceToBox = intersect.x;
+                float distanceWithinBox = intersect.y;
+                float maxDistanceToBox = distanceToBox + distanceWithinBox;
  
                 // Early exit if not intersecting with bounding box
                 half4 color = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, IN.texcoord);
                 if (distanceWithinBox == 0) // Ray dosent intersect with bouding box
                     return color;
 
-                //                                                                     transmittance ↓      ↓ density
-                // transmittance is light reaching camera that dosent get absorbed or scatterd away, T = e^-d.
-                // beer's law adapted from https://advances.realtimerendering.com/s2015/The%20Real-time%20Volumetric%20Cloudscapes%20of%20Horizon%20-%20Zero%20Dawn%20-%20ARTR.pdf
-                //float density = SampleDensity(distanceWithinBox);
-                float beerLambert = exp(-distanceWithinBox);
-
+                
                 Light mainLight = GetMainLight();
                 float3 lightDir = mainLight.direction; // WS direction from light to surface
-                float HG = HenyeyGreenstein(lightDir, rayDir, _Scattering);
+                float HG = HenyeyGreenstein(lightDir, rayDir, _Scattering) * _StepLength;
 
-                float absoption = 1.0 - beerLambert;
-                float3 scatter = mainLight.color * HG * absoption;
-                color.rgb = color.rgb * beerLambert + scatter; // background attenuated + in-scattered light
-                
-                return color;
+
+                float3 rayPosition = rayOrigin + rayDir * distanceToBox;
+                float3 transmittance = color.rgb;
+
+                float distanceTraveled = distanceToBox;
+                float maxRayDist = min(_MaxMarchDistance, distanceToBox + maxDistanceToBox);
+
+                [loop] while (distanceTraveled <= maxRayDist)
+                {
+                    rayPosition = rayOrigin + rayDir * distanceTraveled;
+                    float beerLambert = BeersLambertLaw(rayPosition) * _StepLength;
+                    float absoption = 1.0 - beerLambert;
+                    float3 scatter = mainLight.color * HG * absoption;
+                    transmittance += color.rgb * beerLambert + scatter; // background attenuated + in-scattered light
+                    distanceTraveled += _StepLength;
+                }
+            
+                return float4(transmittance, 1.0);
             }
             ENDHLSL
         }

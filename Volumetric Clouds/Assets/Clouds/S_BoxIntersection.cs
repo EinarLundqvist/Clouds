@@ -1,6 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
+[ExecuteAlways]
 public class BoxIntersection : MonoBehaviour
 {
     [System.Serializable]
@@ -20,30 +21,53 @@ public class BoxIntersection : MonoBehaviour
     
     private Vector3 entryPosition = Vector3.zero;
     private Vector3 exitPosition = Vector3.zero;
-    private Vector2 intersecting;
+    private Vector4 intersecting;
 
     void Update()
     {
-
         currentBounds = new Box(boundingBox.position, boundingBox.localScale);
 
-        intersecting = RaycastIntersectBox(currentBounds, transform.position, transform.up);
+        intersecting = RaycastIntersectBox(currentBounds, transform.position, transform.forward);
 
-        entryPosition = transform.position + transform.up * intersecting.x;
-        exitPosition = transform.position + transform.up * intersecting.y;
+        entryPosition = transform.position + transform.forward * intersecting.x;
+        exitPosition = transform.position + transform.forward * intersecting.y;
     }
 
     void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
-        if (intersecting.x <= intersecting.y)
-            Gizmos.DrawLine(entryPosition, entryPosition + transform.up * Vector3.Distance(entryPosition, exitPosition));
+        bool isIntersecting = intersecting.x <= intersecting.y;
+        if (isIntersecting)
+        {
+            Gizmos.DrawLine(entryPosition, entryPosition + transform.forward * Vector3.Distance(entryPosition, exitPosition));
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(entryPosition, 0.2f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(exitPosition, 0.2f);
+        }
 
-        Gizmos.DrawSphere(transform.position, 0.05f);
-        Gizmos.color = Color.green;
-        Gizmos.DrawSphere(entryPosition, 0.1f);
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(exitPosition, 0.1f);
+        if (!isIntersecting)
+            return;
+
+        float maxMarchDistance = 50;
+        float stepLength = 0.5f;
+        
+        float distanceTraveled = intersecting.z;
+        float maxRayDist = Mathf.Min(maxMarchDistance, intersecting.z + (intersecting.z + intersecting.w));
+        while (distanceTraveled <= maxRayDist)
+        {
+            float3 rayPosition = transform.position + transform.forward * distanceTraveled;
+
+            if (distanceTraveled > intersecting.z + intersecting.w)
+                break;
+
+            float normalizedDistanceTraveled = distanceTraveled / maxRayDist;
+            float brightnessBoost = 0.3f;
+            Gizmos.color = new Color(normalizedDistanceTraveled + brightnessBoost, 1 - normalizedDistanceTraveled + brightnessBoost, 1 - normalizedDistanceTraveled + brightnessBoost);
+            Gizmos.DrawCube(rayPosition, Vector3.one * (normalizedDistanceTraveled * 0.15f + 0.1f));
+            distanceTraveled += stepLength;
+            
+        }
     }
 
     Vector3 Vec3Divide(Vector3 numerator, Vector3 denoninator)
@@ -71,7 +95,7 @@ public class BoxIntersection : MonoBehaviour
 
     // https://jcgt.org/published/0007/03/04/paper.pdf
     // x is distance to box, y is max distance trough box
-    Vector2 RaycastIntersectBox(Box box, Vector3 rayPosition, Vector3 rayDir)
+    Vector4 RaycastIntersectBox(Box box, Vector3 rayPosition, Vector3 rayDir)
     {
         Vector3 half = box.size * 0.5f;
         Vector3 bMin = box.position - half;
@@ -86,8 +110,11 @@ public class BoxIntersection : MonoBehaviour
         float minDistanceToBox = Mathf.Max(0, Mathf.Max(tMin.x, tMin.y, tMin.z));
         float maxDistanceToBox = Mathf.Max(0, Mathf.Min(tMax.x, tMax.y, tMax.z));
 
+        float distanceWithinBox = Mathf.Max(0, maxDistanceToBox - minDistanceToBox);
+        float distanceToBox = Mathf.Max(0, minDistanceToBox);
+
         // minDistanceToBox <= maxDistanceToBox means ray intersects with box
         
-        return new Vector2(minDistanceToBox, maxDistanceToBox);
+        return new Vector4(minDistanceToBox, maxDistanceToBox, distanceToBox, distanceWithinBox);
     }
 }

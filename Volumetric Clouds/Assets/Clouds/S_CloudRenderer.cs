@@ -1,6 +1,6 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
+[ExecuteAlways]
 public class S_CloudRenderer : MonoBehaviour
 {
     
