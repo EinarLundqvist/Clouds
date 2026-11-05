@@ -31,7 +31,7 @@ Material:
     m_Floats:
     - _MaxMarchDistance: 100
     - _Scattering: 0.965
-    - _StepLength: 0.2
+    - _StepLength: 0.5
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

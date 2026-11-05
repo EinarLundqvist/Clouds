@@ -8,7 +8,7 @@ Shader "Custom/SH_BoundingBox"
 
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType" = "Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
         ZWrite Off Cull Off 
         Pass
         {
