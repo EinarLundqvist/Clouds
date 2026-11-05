@@ -36,7 +36,9 @@ public class BoxIntersection : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(transform.position, transform.position + transform.up * Vector3.Distance(transform.position, exitPosition));
+        if (intersecting.x <= intersecting.y)
+            Gizmos.DrawLine(entryPosition, entryPosition + transform.up * Vector3.Distance(entryPosition, exitPosition));
+
         Gizmos.DrawSphere(transform.position, 0.05f);
         Gizmos.color = Color.green;
         Gizmos.DrawSphere(entryPosition, 0.1f);
@@ -81,8 +83,8 @@ public class BoxIntersection : MonoBehaviour
         float3 tMin = Vec3Min(t0, t1);
         float3 tMax = Vec3Max(t0, t1);
 
-        float minDistanceToBox = Mathf.Max(tMin.x, tMin.y, tMin.z);
-        float maxDistanceToBox = Mathf.Min(tMax.x, tMax.y, tMax.z);
+        float minDistanceToBox = Mathf.Max(0, Mathf.Max(tMin.x, tMin.y, tMin.z));
+        float maxDistanceToBox = Mathf.Max(0, Mathf.Min(tMax.x, tMax.y, tMax.z));
 
         // minDistanceToBox <= maxDistanceToBox means ray intersects with box
         
