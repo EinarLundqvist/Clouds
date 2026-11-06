@@ -18,6 +18,7 @@ public class BoxIntersection : MonoBehaviour
     }
     [SerializeField] private Transform boundingBox;
     [SerializeField] private Box currentBounds;
+    [SerializeField] Light mainLight;
     
     private Vector3 entryPosition = Vector3.zero;
     private Vector3 exitPosition = Vector3.zero;
@@ -51,15 +52,37 @@ public class BoxIntersection : MonoBehaviour
 
         float maxMarchDistance = 50;
         float stepLength = 0.5f;
+
+        // z distanceToBox
+        // w maxDistanceToBox
         
         float distanceTraveled = intersecting.z;
-        float maxRayDist = Mathf.Min(maxMarchDistance, intersecting.z + (intersecting.z + intersecting.w));
-        while (distanceTraveled <= maxRayDist)
+        float maxRayDist = Mathf.Min(maxMarchDistance, intersecting.y);
+        while (distanceTraveled < maxRayDist)
         {
-            float3 rayPosition = transform.position + transform.forward * distanceTraveled;
+            Vector3 rayPosition = transform.position + transform.forward * distanceTraveled;
 
-            if (distanceTraveled > intersecting.z + intersecting.w)
-                break;
+            Vector3 lightDir = -mainLight.transform.forward;
+            float distanceToLightTraveled = 0.0f;
+            int stepsToLight = 5;
+            float stepLengthToLight = 1.0f;
+
+            float4 secondIntersection = RaycastIntersectBox(currentBounds, rayPosition, lightDir);
+            float distanceWithinBox = secondIntersection.w - stepLengthToLight;
+
+            float maxLightMarchDistance = Mathf.Min(distanceWithinBox, stepsToLight * stepLengthToLight);
+            
+            while (distanceToLightTraveled < maxLightMarchDistance)
+            {
+                distanceToLightTraveled += stepLengthToLight;
+
+                Vector3 lightRayPosition = (Vector3)rayPosition + (lightDir * distanceToLightTraveled);
+                
+                Gizmos.color = Color.purple;
+                Gizmos.DrawCube(lightRayPosition, Vector3.one * 0.05f);
+                
+            }
+
 
             float normalizedDistanceTraveled = distanceTraveled / maxRayDist;
             float brightnessBoost = 0.3f;

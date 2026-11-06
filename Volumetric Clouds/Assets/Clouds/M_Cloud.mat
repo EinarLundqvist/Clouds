@@ -27,11 +27,17 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Blue:
+        m_Texture: {fileID: 2800000, guid: 8ac234debdb478d4c8b5408c8157e58a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _LightrayStepLength: 0.59
     - _MaxMarchDistance: 100
-    - _Scattering: 0.965
-    - _StepLength: 0.5
+    - _Scattering: 0.2
+    - _StepLength: 0.31
+    - _StepsTowardsLight: 10
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
