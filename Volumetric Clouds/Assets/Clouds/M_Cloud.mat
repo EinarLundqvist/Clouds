@@ -33,11 +33,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _LightrayStepLength: 0.59
+    - _LightrayStepLength: 1
     - _MaxMarchDistance: 100
     - _Scattering: 0.2
     - _StepLength: 0.31
-    - _StepsTowardsLight: 10
+    - _StepsTowardsLight: 7
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

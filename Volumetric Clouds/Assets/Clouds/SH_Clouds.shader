@@ -174,7 +174,7 @@ Shader "Custom/SH_Clouds"
 
             float SampleDensity(float3 worldPosition)
             {
-                return saturate(((simplexNoise(worldPosition + _Time.yyy * 0.3) + 1.0) * 0.5) - 0.2) * 2;
+                return saturate(((simplexNoise(worldPosition + _Time.yyy * 0.3) + 1.0) * 0.5) - 0.2) * 3.0;
             }
 
             //                                                                         transmittance ↓      ↓ density
