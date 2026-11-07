@@ -1,5 +1,8 @@
 using Unity.Mathematics;
+using Unity.VisualScripting;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [ExecuteAlways]
 public class BoxIntersection : MonoBehaviour
@@ -19,6 +22,11 @@ public class BoxIntersection : MonoBehaviour
     [SerializeField] private Transform boundingBox;
     [SerializeField] private Box currentBounds;
     [SerializeField] Light mainLight;
+    [SerializeField, Range(0.1f, 20.0f)] private float stepLength = 0.5f;
+    [SerializeField, Range(0.1f, 100.0f)] private float maxMarchDistance = 50.0f;
+    [SerializeField, Range(1, 10)] private float toLightSearchDistance = 5;
+    [SerializeField, Range(0.1f, 10.0f)] private float stepLengthToLight = 1.0f;
+    [SerializeField] private Mesh arrowMesh;
     
     private Vector3 entryPosition = Vector3.zero;
     private Vector3 exitPosition = Vector3.zero;
@@ -46,12 +54,11 @@ public class BoxIntersection : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(exitPosition, 0.2f);
         }
+        Gizmos.color = Color.red;
+        Gizmos.DrawIcon(transform.position + transform.forward * maxMarchDistance, "CrossIcon");
 
         if (!isIntersecting)
             return;
-
-        float maxMarchDistance = 50;
-        float stepLength = 0.5f;
 
         // z distanceToBox
         // w maxDistanceToBox
@@ -64,30 +71,28 @@ public class BoxIntersection : MonoBehaviour
 
             Vector3 lightDir = -mainLight.transform.forward;
             float distanceToLightTraveled = 0.0f;
-            int stepsToLight = 5;
-            float stepLengthToLight = 1.0f;
 
             float4 secondIntersection = RaycastIntersectBox(currentBounds, rayPosition, lightDir);
             float distanceWithinBox = secondIntersection.w - stepLengthToLight;
-
-            float maxLightMarchDistance = Mathf.Min(distanceWithinBox, stepsToLight * stepLengthToLight);
+            float maxLightMarchDistance = Mathf.Min(distanceWithinBox, toLightSearchDistance);
             
             while (distanceToLightTraveled < maxLightMarchDistance)
             {
                 distanceToLightTraveled += stepLengthToLight;
 
                 Vector3 lightRayPosition = (Vector3)rayPosition + (lightDir * distanceToLightTraveled);
-                
-                Gizmos.color = Color.purple;
-                Gizmos.DrawCube(lightRayPosition, Vector3.one * 0.05f);
-                
-            }
 
+                float traveledDistance = distanceToLightTraveled / maxLightMarchDistance;
+                Gizmos.color = new Color(traveledDistance, 0.0f, traveledDistance);
+                Gizmos.DrawMesh(arrowMesh, 0, lightRayPosition, Quaternion.LookRotation(-transform.up, lightDir) * Quaternion.Euler(0, 0, 90.0f), Vector3.one * 0.2f);
+            }
+            Gizmos.color = new Color(0.15f, 0.0f, 0.15f);
+            Gizmos.DrawLine(rayPosition, rayPosition + lightDir * distanceToLightTraveled);
 
             float normalizedDistanceTraveled = distanceTraveled / maxRayDist;
             float brightnessBoost = 0.3f;
             Gizmos.color = new Color(normalizedDistanceTraveled + brightnessBoost, 1 - normalizedDistanceTraveled + brightnessBoost, 1 - normalizedDistanceTraveled + brightnessBoost);
-            Gizmos.DrawCube(rayPosition, Vector3.one * (normalizedDistanceTraveled * 0.15f + 0.1f));
+            Gizmos.DrawSphere(rayPosition, normalizedDistanceTraveled * 0.15f + 0.05f);
             distanceTraveled += stepLength;
             
         }
@@ -134,10 +139,9 @@ public class BoxIntersection : MonoBehaviour
         float maxDistanceToBox = Mathf.Max(0, Mathf.Min(tMax.x, tMax.y, tMax.z));
 
         float distanceWithinBox = Mathf.Max(0, maxDistanceToBox - minDistanceToBox);
-        float distanceToBox = Mathf.Max(0, minDistanceToBox);
+        float distanceToBox = minDistanceToBox;
 
         // minDistanceToBox <= maxDistanceToBox means ray intersects with box
-        
         return new Vector4(minDistanceToBox, maxDistanceToBox, distanceToBox, distanceWithinBox);
     }
 }

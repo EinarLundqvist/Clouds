@@ -33,12 +33,19 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _DensityMultiplier: 2
+    - _LightAbsorption: 1
     - _LightrayStepLength: 1
-    - _MaxMarchDistance: 100
-    - _Scattering: 0.2
-    - _StepLength: 0.31
+    - _MaxMarchDistance: 30
+    - _PowderStregth: 0
+    - _Scattering: 0.8
+    - _StepLength: 1
     - _StepsTowardsLight: 7
+    - _toLightSearchDistance: 15
     m_Colors:
+    - _AmbientBottom: {r: 1, g: 1, b: 1, a: 1}
+    - _AmbientTop: {r: 0.43801177, g: 0.46226695, b: 0.4811321, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _CloudColor: {r: 0.8207547, g: 0.8207547, b: 0.8207547, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
