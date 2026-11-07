@@ -735,6 +735,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd56569a785c0e439dbfd40c64dac07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::S_CloudNoiseGeneratior
+  resolution: 32
+  textureFormat: 63
+  wrapMode: 0
+  filterMode: 2
+  savePath: Assets/Clouds/CloudNoise.asset
+  NoiseCompute: {fileID: 7200000, guid: 7266cc6de0d3a364080a6df02981cb59, type: 3}
 --- !u!4 &1865130099
 Transform:
   m_ObjectHideFlags: 0
@@ -744,7 +750,7 @@ Transform:
   m_GameObject: {fileID: 1865130097}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.93718, y: 27.10657, z: 25.62294}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

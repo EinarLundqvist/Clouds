@@ -2,8 +2,7 @@ Shader "Custom/SH_Clouds"
 {
     Properties
     {
-        [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
-        [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
+        [MainTexture] _CloudNoise("Cloud Noise", 3D) = "white" {}
         _Scattering ("Scattering", Range(-1, 1)) = 0
         _DensityMultiplier ("Density Multiplier", float) = 1
         _CloudColor ("Cloud Color", Color) = (1, 1, 1, 1)
@@ -38,14 +37,13 @@ Shader "Custom/SH_Clouds"
             float3 boundsPosition;
             float3 boundsSize;
 
-            TEXTURE2D(_BaseMap);
+            TEXTURE3D(_CloudNoise);
             TEXTURE2D(_Blue);
-            SAMPLER(sampler_BaseMap);
+            SAMPLER(sampler_CloudNoise);
             SAMPLER(sampler_Blue);
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
-                float4 _BaseMap_ST;
                 float _Scattering;
                 float _MaxMarchDistance;
                 float _StepLength;
@@ -184,7 +182,8 @@ Shader "Custom/SH_Clouds"
 
             float SampleDensity(float3 worldPosition)
             {
-                return saturate(((simplexNoise(worldPosition * 0.3 + _Time.yyy * 0.3) + 1.0) * 0.5) - 0.2) * _DensityMultiplier;
+                return SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, worldPosition * 0.2) * _DensityMultiplier;
+                //return saturate(((simplexNoise(worldPosition * 0.3 + _Time.yyy * 0.3) + 1.0) * 0.5) - 0.2) * _DensityMultiplier;
             }
 
             //                                                                         transmittance ↓      ↓ density

@@ -1,0 +1,32 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel FillWithRed
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWStructuredBuffer<float> ResultBuffer;
+
+[numthreads(8,8,1)]
+void FillWithRed (uint id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+
+    ResultBuffer[id] = id;
+}
+
+/*
+        // Populate the array so that the x, y, and z values of the texture map to red, blue, and green colors
+        float inverseResolution = 1.0f / (size - 1.0f);
+        for (int z = 0; z < size; z++)
+        {
+            int zOffset = z * size * size;
+            for (int y = 0; y < size; y++)
+            {
+                int yOffset = y * size;
+                for (int x = 0; x < size; x++)
+                {
+                    colors[x + yOffset + zOffset] = new Color(x * inverseResolution,
+                        y * inverseResolution, z * inverseResolution, 1.0f);
+                }
+            }
+        }
+        */
