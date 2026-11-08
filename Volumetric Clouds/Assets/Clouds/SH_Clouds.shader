@@ -2,27 +2,36 @@ Shader "Custom/SH_Clouds"
 {
     Properties
     {
-        _Scattering ("Scattering", Range(-1, 1)) = 0
-        _ScatteringStrength ("Scattering Strength", Range(0.0, 1.0)) = 0.5
-        _DensityMultiplier ("Density Multiplier", Range(0.0, 5.0)) = 1
-        _CloudColor ("Cloud Color", Color) = (1, 1, 1, 1)
+        // scatting & density
+        _Scattering ("Scattering", Range(-1, 1)) = 0.7
+        _ScatteringStrength ("Scattering Strength", Range(0.0, 1.0)) = 0.104
+        _PowderStregth ("Powder Strength", Range(0.0, 2.0)) = 0.709
+        _DensityMultiplier ("Density Multiplier", Range(0.0, 5.0)) = 0.66
+
+        // cloud color
+        _CloudColor ("Cloud Color", Color) = (0.8207547, 0.8207547, 0.8207547, 1)
         _AmbientBottom ("Ambient Top", Color) = (1, 1, 1, 1)
-        _AmbientTop ("Ambient Bottom", Color) = (1, 1, 1, 1)
+        _AmbientTop ("Ambient Bottom", Color) = (0.41, 0.4494652, 0.4823529, 1)
         
-        _StepLength ("Step Length", Range(0.05, 50)) = 1
-        _MaxMarchDistance ("Max March Distance", float) = 50
-        _PowderStregth ("Powder Strength", Range(0.0, 2.0)) = 0.5
+        // ray marching
+        _StepLength ("Step Length", Range(0.05, 100)) = 50
+        _MaxMarchDistance ("Max March Distance", float) = 3000
+
         //Light marching
-        _LightrayStepLength ("Lightray Length", Range(0.1, 5)) = 2.0
-        _toLightSearchDistance ("to Light Search Distance", int) = 5
-        
-        [MainTexture] _CloudNoise("Cloud Noise", 3D) = "white" {}
-        _NoiseThreshold ("Noise Threshold", Range(0.0, 1.0)) = 0.1
-        _NoiseScale ("Noise Scale", float) = 1.0
-        [MainTexture] _CloudNoise2("Cloud Noise 2", 3D) = "white" {}
-        _NoiseThreshold2 ("Noise Threshold 2", Range(0.0, 1.0)) = 0.1
-        _NoiseScale2 ("Noise Scale 2", float) = 1.0
+        _LightrayStepLength ("Lightray Length", Range(0.1, 50)) = 50
+        _toLightSearchDistance ("to Light Search Distance", int) = 100
         _Blue ("Blue", 2D) = "white"
+        
+        // Noise settings
+        _CloudNoise("Cloud Noise", 3D) = "white" {}
+        _ShapeNoiseThreshold ("Noise Threshold", Range(0.0, 1.0)) = 0.438
+        _ShapeNoiseScale ("Noise Scale", float) = 3
+
+        _CloudNoise2("Detail Noise", 3D) = "white" {}
+        _DetailNoiseThreshold ("Detail Noise Threshold", Range(0.0, 1.0)) = 0.0
+        _DetailNoiseScale ("Detail Noise Scale ", float) = 10
+        _UseDetailNoise ("Use Detail Noise", Range(0.0, 1.0)) = 1
+        _DetailErotionStrength ("Detail Erotion Strength", Range(-1.0, 1.0)) = -0.228
     }
 
     SubShader
@@ -52,22 +61,35 @@ Shader "Custom/SH_Clouds"
             SAMPLER(sampler_Blue);
 
             CBUFFER_START(UnityPerMaterial)
-                half4 _BaseColor;
+
+                // scattering & density
                 float _Scattering;
                 float _ScatteringStrength;
-                float _MaxMarchDistance;
+                float _PowderStregth;
+                float _DensityMultiplier;
+                
+                // ray maching
                 float _StepLength;
+                float _MaxMarchDistance;
+                
+                // light ray maching
                 float _LightrayStepLength;
                 float _toLightSearchDistance;
-                float _DensityMultiplier;
+
+                //color
                 float3 _CloudColor;
                 float3 _AmbientBottom;
                 float3 _AmbientTop;
-                float _PowderStregth;
-                float _NoiseScale;
-                float _NoiseScale2;
-                float _NoiseThreshold;
-                float _NoiseThreshold2;
+
+                // shape noise
+                float _ShapeNoiseThreshold;
+                float _ShapeNoiseScale;
+
+                // detail noise
+                float _DetailNoiseThreshold;
+                float _DetailNoiseScale;
+                float _UseDetailNoise;
+                float _DetailErotionStrength;
             CBUFFER_END
 
             float max(float m, float a, float x)
@@ -123,11 +145,24 @@ Shader "Custom/SH_Clouds"
             }
 
             float SampleDensity(float3 worldPosition)
-            { 
-                float3 uvw = worldPosition * _NoiseScale; //+ _Time.yyy * 0.03;
-                float3 uvw2 = worldPosition * _NoiseScale2; //+ _Time.yyy * 0.03;
-                float noise2 = saturate(SAMPLE_TEXTURE3D(_CloudNoise2, sampler_CloudNoise2, uvw2) - _NoiseThreshold2);
-                return saturate(SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, uvw) - _NoiseThreshold) * _DensityMultiplier * noise2;
+            {
+                float3 uvw = worldPosition * _ShapeNoiseScale * 0.0001; //+ _Time.yyy * 0.03;
+                float bigCloudShapes = SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, uvw);
+                if (bigCloudShapes <= 0)
+                    return 0.0;
+
+
+                float detail = 1.0;
+                if (_UseDetailNoise)
+                {
+                    float3 uvw2 = worldPosition * _DetailNoiseScale * 0.0001 + _Time.yyy * 0.01;
+                    detail = saturate(SAMPLE_TEXTURE3D(_CloudNoise2, sampler_CloudNoise2, uvw2) - _DetailNoiseThreshold);
+                }
+
+                float edge = 1.0 - bigCloudShapes;
+                float erosion = detail * _DetailErotionStrength * edge * edge;
+                
+                return saturate(bigCloudShapes - _ShapeNoiseThreshold - erosion) * _DensityMultiplier;
             }
 
             //                                                                         transmittance ↓      ↓ density

@@ -41,23 +41,32 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DensityMultiplier: 1
+    - _DensityMultiplier: 0.66
+    - _DetailErotionStrength: -0.306
+    - _DetailNoiseScale: 10
+    - _DetailNoiseThreshold: 0
+    - _ErotionStrength: -0.228
     - _LightAbsorption: 1
-    - _LightrayStepLength: 1
-    - _MaxMarchDistance: 500
-    - _NoiseScale: 0.002
-    - _NoiseScale2: 0.0005
-    - _NoiseThreshold: 0.37
-    - _NoiseThreshold2: 0.416
-    - _PowderStregth: 1
+    - _LightrayStepLength: 43.7
+    - _MaxMarchDistance: 3000
+    - _NoiseScale: 3
+    - _NoiseScale2: 10.01
+    - _NoiseThreshold: 0.438
+    - _NoiseThreshold2: 0
+    - _PowderStregth: 2
     - _Scattering: 0.7
-    - _ScatteringStrength: 0.104
-    - _StepLength: 5
+    - _ScatteringStrength: 0.094
+    - _ShapeNoiseScale: 3
+    - _ShapeNoiseThreshold: 0.438
+    - _StepLength: 40.3
     - _StepsTowardsLight: 7
-    - _toLightSearchDistance: 15
+    - _UseDetailNoise: 1
+    - _UseNoise: 1
+    - _UseNoise2: 0.055
+    - _toLightSearchDistance: 100
     m_Colors:
     - _AmbientBottom: {r: 1, g: 1, b: 1, a: 1}
-    - _AmbientTop: {r: 0.43801177, g: 0.46226695, b: 0.4811321, a: 1}
+    - _AmbientTop: {r: 0.41, g: 0.44946525, b: 0.48235294, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _CloudColor: {r: 0.8207547, g: 0.8207547, b: 0.8207547, a: 1}
   m_BuildTextureStacks: []
