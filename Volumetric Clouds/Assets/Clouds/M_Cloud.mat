@@ -40,7 +40,9 @@ Material:
     - _DensityMultiplier: 2
     - _LightAbsorption: 1
     - _LightrayStepLength: 1
-    - _MaxMarchDistance: 30
+    - _MaxMarchDistance: 200
+    - _NoiseScale: 0.03
+    - _NoiseThreshold: 0.5
     - _PowderStregth: 0
     - _Scattering: 0.8
     - _StepLength: 1

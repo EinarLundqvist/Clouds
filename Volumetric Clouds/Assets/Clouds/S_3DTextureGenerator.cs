@@ -1,21 +1,23 @@
-using System;
 using UnityEditor;
 using UnityEngine;
 
 public class S_3DTextureGenerator : MonoBehaviour
 {
     [SerializeField] private int resolution = 32;
-    [SerializeField] TextureFormat textureFormat = TextureFormat.R8;
-    [SerializeField] TextureWrapMode wrapMode = TextureWrapMode.Clamp;
-    [SerializeField] FilterMode filterMode = FilterMode.Trilinear;
+    [SerializeField] TextureFormat textureFormat = TextureFormat.RFloat;
+    [SerializeField] TextureWrapMode wrapMode = TextureWrapMode.Repeat;
+    [SerializeField] FilterMode filterMode = FilterMode.Bilinear;
     [SerializeField] private string savePath = "Assets/Clouds/CloudNoise.asset";
     [SerializeField] private ComputeShader NoiseCompute;
 
-    public void CreateTexture3D()
+    [Header("Noise Settings")]
+    [SerializeField] private int cellAmount = 10;
+
+    private void OnValidate()
     {
-        
+        CreateTexture3D();
     }
-    void  OnValidate()
+    public void CreateTexture3D()
     {
         int size = resolution;
 
@@ -26,18 +28,16 @@ public class S_3DTextureGenerator : MonoBehaviour
 
         // Create a 3-dimensional flat array to store color data
         float[] density = new float[size * size * size];
-
+        
         ComputeBuffer densityBuffer = new ComputeBuffer(density.Length, sizeof(float));
         Dispatch(densityBuffer, density.Length);
+
         densityBuffer.GetData(density); // copies the density buffer from the GPU to the density float array
 
-        // Copy the color values to the texture
-        texture.SetPixelData(density, 0);
+        densityBuffer.Release(); // release the allocated buffer after its done
 
-        for (int i = 0; i < 10; i++)
-        {
-            print("density: " + density[i]);
-        }
+        // copy the density values to the 3D texture
+        texture.SetPixelData(density, 0);
 
         // Apply the changes to the texture and upload the updated texture to the GPU
         texture.Apply();
@@ -56,9 +56,13 @@ public class S_3DTextureGenerator : MonoBehaviour
     private void Dispatch(ComputeBuffer densityBuffer, int bufferLength)
     {
         int kernelIndex = NoiseCompute.FindKernel("FillWithRed");
-        NoiseCompute.SetBuffer(kernelIndex, "ResultBuffer", densityBuffer);
 
-        int threadGroups = Mathf.CeilToInt(bufferLength / 64.0f);
-        NoiseCompute.Dispatch(kernelIndex, threadGroups, 1, 1);
+        // settings variables
+        NoiseCompute.SetBuffer(kernelIndex, "_ResultBuffer", densityBuffer);
+        NoiseCompute.SetInt("_Resolution", resolution);
+        NoiseCompute.SetInt("_CellAmount", cellAmount);
+
+        int threadGroups = Mathf.CeilToInt(resolution / 8.0f);
+        NoiseCompute.Dispatch(kernelIndex, threadGroups, threadGroups, threadGroups);
     }
 }

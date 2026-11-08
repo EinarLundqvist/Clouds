@@ -18,6 +18,7 @@ public class S_CloudNoiseGeneratorEditor : Editor
         root.Add(CreateProperty("filterMode"));
         root.Add(CreateProperty("savePath"));
         root.Add(CreateProperty("NoiseCompute"));
+        root.Add(CreateProperty("cellAmount"));
 
         var button = new Button(() => ((S_3DTextureGenerator)target).CreateTexture3D()) { text = "Generate" };
         root.Add(button);

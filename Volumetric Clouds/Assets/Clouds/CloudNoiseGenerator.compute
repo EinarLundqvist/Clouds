@@ -1,32 +1,55 @@
-// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel FillWithRed
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
-RWStructuredBuffer<float> ResultBuffer;
+RWStructuredBuffer<float> _ResultBuffer;
+uint _Resolution;
+float _CellAmount;
 
-[numthreads(8,8,1)]
-void FillWithRed (uint id : SV_DispatchThreadID)
+float3 Hash(float3 p)
 {
-    // TODO: insert actual code here!
-
-    ResultBuffer[id] = id;
+    return frac(sin(dot(p, float3(12.9898f, 78.233f, 37.719f))) * 43758.5453f);
 }
 
-/*
-        // Populate the array so that the x, y, and z values of the texture map to red, blue, and green colors
-        float inverseResolution = 1.0f / (size - 1.0f);
-        for (int z = 0; z < size; z++)
-        {
-            int zOffset = z * size * size;
-            for (int y = 0; y < size; y++)
+// https://docs.unity.com/en-us/engine/6000.7/script-reference/unityengine/mathf/repeat
+float3 Repeat(float3 t, float3 length)
+{
+    return t - floor(t / length) * length;
+}
+
+float Voronoi(float3 uvw)
+{
+    float3 cellID = floor(uvw * _CellAmount);  // cell ID like 2, 3, 0
+    float3 cellCoord = frac(uvw * _CellAmount) - 0.5f; // local coordinate within cell, like -0.5, 0.0, 0.9
+
+    float minDistanceFromCenter = 999.9f;
+    for (float x = -1.0; x <= 1.0; x++)
+        for (float y = -1.0; y <= 1.0; y++)
+            for (float z = -1.0; z <= 1.0; z++)
             {
-                int yOffset = y * size;
-                for (int x = 0; x < size; x++)
-                {
-                    colors[x + yOffset + zOffset] = new Color(x * inverseResolution,
-                        y * inverseResolution, z * inverseResolution, 1.0f);
-                }
+                float3 neighborCellCoord = float3(x, y, z);
+                float3 WrappedPointInNeighboringCell = Repeat((cellID + neighborCellCoord), _CellAmount);
+                float3 noise = Hash(WrappedPointInNeighboringCell);
+                float3 pointInNeighboringCell = neighborCellCoord + noise;
+                
+                float distanceToPoint = distance(pointInNeighboringCell, cellCoord);
+                minDistanceFromCenter = min(distanceToPoint, minDistanceFromCenter);
             }
-        }
-        */
+
+    return 1 - minDistanceFromCenter;
+}
+
+[numthreads(8,8,8)]
+void FillWithRed (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Resolution || id.y >= _Resolution || id.z >= _Resolution)
+        return;
+    
+    // moving in x moves one element
+    // moving in y script whole x row
+    // moving in z skips whole slice of x and y elements
+    uint index = (id.x) + (id.y * _Resolution) + (id.z * _Resolution * _Resolution);
+    float3 uvw = (id + 0.5f) / _Resolution;
+
+    float voronoi = Voronoi(uvw);
+
+    _ResultBuffer[index] = voronoi;
+}
