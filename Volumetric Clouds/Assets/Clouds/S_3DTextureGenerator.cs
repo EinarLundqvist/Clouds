@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class S_3DTextureGenerator : MonoBehaviour
 {
@@ -9,9 +10,11 @@ public class S_3DTextureGenerator : MonoBehaviour
     [SerializeField] FilterMode filterMode = FilterMode.Bilinear;
     [SerializeField] private string savePath = "Assets/Clouds/CloudNoise.asset";
     [SerializeField] private ComputeShader NoiseCompute;
+    [HideInInspector] public Texture3D CloudTexture;
 
     [Header("Noise Settings")]
     [SerializeField] private int cellAmount = 10;
+    [SerializeField, Range(0.0f, 1.0f)] private float seed = 0;
 
     private void OnValidate()
     {
@@ -25,6 +28,7 @@ public class S_3DTextureGenerator : MonoBehaviour
         Texture3D texture = new Texture3D(size, size, size, textureFormat, false);
         texture.wrapMode = wrapMode;
         texture.filterMode = filterMode;
+        texture.name = "CloudNoise";
 
         // Create a 3-dimensional flat array to store color data
         float[] density = new float[size * size * size];
@@ -51,6 +55,8 @@ public class S_3DTextureGenerator : MonoBehaviour
         }
         else
             AssetDatabase.CreateAsset(texture, savePath);
+
+        CloudTexture = texture;
     }
 
     private void Dispatch(ComputeBuffer densityBuffer, int bufferLength)
@@ -61,6 +67,7 @@ public class S_3DTextureGenerator : MonoBehaviour
         NoiseCompute.SetBuffer(kernelIndex, "_ResultBuffer", densityBuffer);
         NoiseCompute.SetInt("_Resolution", resolution);
         NoiseCompute.SetInt("_CellAmount", cellAmount);
+        NoiseCompute.SetFloat("_Seed", seed);
 
         int threadGroups = Mathf.CeilToInt(resolution / 8.0f);
         NoiseCompute.Dispatch(kernelIndex, threadGroups, threadGroups, threadGroups);

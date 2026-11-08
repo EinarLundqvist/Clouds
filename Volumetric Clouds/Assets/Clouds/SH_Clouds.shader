@@ -2,23 +2,27 @@ Shader "Custom/SH_Clouds"
 {
     Properties
     {
-        [MainTexture] _CloudNoise("Cloud Noise", 3D) = "white" {}
         _Scattering ("Scattering", Range(-1, 1)) = 0
-        _DensityMultiplier ("Density Multiplier", float) = 1
+        _ScatteringStrength ("Scattering Strength", Range(0.0, 1.0)) = 0.5
+        _DensityMultiplier ("Density Multiplier", Range(0.0, 5.0)) = 1
         _CloudColor ("Cloud Color", Color) = (1, 1, 1, 1)
         _AmbientBottom ("Ambient Top", Color) = (1, 1, 1, 1)
         _AmbientTop ("Ambient Bottom", Color) = (1, 1, 1, 1)
-
-        _StepLength ("Step Length", Range(0.05, 5)) = 1
+        
+        _StepLength ("Step Length", Range(0.05, 50)) = 1
         _MaxMarchDistance ("Max March Distance", float) = 50
-        _PowderStregth ("Powder Strength", Range(0.0, 1.0)) = 0.5
+        _PowderStregth ("Powder Strength", Range(0.0, 2.0)) = 0.5
         //Light marching
         _LightrayStepLength ("Lightray Length", Range(0.1, 5)) = 2.0
         _toLightSearchDistance ("to Light Search Distance", int) = 5
-
-        _Blue ("Blue", 2D) = "white"
+        
+        [MainTexture] _CloudNoise("Cloud Noise", 3D) = "white" {}
+        _NoiseThreshold ("Noise Threshold", Range(0.0, 1.0)) = 0.1
         _NoiseScale ("Noise Scale", float) = 1.0
-        _NoiseThreshold ("Noise Threshold", float) = 0.1
+        [MainTexture] _CloudNoise2("Cloud Noise 2", 3D) = "white" {}
+        _NoiseThreshold2 ("Noise Threshold 2", Range(0.0, 1.0)) = 0.1
+        _NoiseScale2 ("Noise Scale 2", float) = 1.0
+        _Blue ("Blue", 2D) = "white"
     }
 
     SubShader
@@ -41,13 +45,16 @@ Shader "Custom/SH_Clouds"
             float3 boundsSize;
 
             TEXTURE3D(_CloudNoise);
+            TEXTURE3D(_CloudNoise2);
             TEXTURE2D(_Blue);
             SAMPLER(sampler_CloudNoise);
+            SAMPLER(sampler_CloudNoise2);
             SAMPLER(sampler_Blue);
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
                 float _Scattering;
+                float _ScatteringStrength;
                 float _MaxMarchDistance;
                 float _StepLength;
                 float _LightrayStepLength;
@@ -58,7 +65,9 @@ Shader "Custom/SH_Clouds"
                 float3 _AmbientTop;
                 float _PowderStregth;
                 float _NoiseScale;
+                float _NoiseScale2;
                 float _NoiseThreshold;
+                float _NoiseThreshold2;
             CBUFFER_END
 
             float max(float m, float a, float x)
@@ -110,13 +119,15 @@ Shader "Custom/SH_Clouds"
 
                 static const float pi = 3.14159265358979323;
                 const float g2 = g * g;
-                return ((1.0 - g2) / pow(1.0 + g2 - 2.0 * g * cosTheta, 1.5));
+                return ((1.0 - g2) / pow(1.0 + g2 - 2.0 * g * cosTheta, 1.5)) * _ScatteringStrength;
             }
 
             float SampleDensity(float3 worldPosition)
-            {
+            { 
                 float3 uvw = worldPosition * _NoiseScale; //+ _Time.yyy * 0.03;
-                return saturate(SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, uvw) - _NoiseThreshold) * _DensityMultiplier;
+                float3 uvw2 = worldPosition * _NoiseScale2; //+ _Time.yyy * 0.03;
+                float noise2 = saturate(SAMPLE_TEXTURE3D(_CloudNoise2, sampler_CloudNoise2, uvw2) - _NoiseThreshold2);
+                return saturate(SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, uvw) - _NoiseThreshold) * _DensityMultiplier * noise2;
             }
 
             //                                                                         transmittance ↓      ↓ density
@@ -224,7 +235,7 @@ Shader "Custom/SH_Clouds"
                     float beerLambert = BeerLambert(density * _StepLength);
                     float absoption = 1.0 - beerLambert;
                     
-                    float powder = lerp(1.0, Powder(density * _StepLength), _PowderStregth);
+                    float powder = lerp(1.0, Powder(density * _StepLength), -_PowderStregth);
                     float3 sunAmountHere = mainLight.color * lightrayTransmittance * powder;
                     float3 ambient = ambientLighting(rayPosition);
                     float3 scatter = (sunAmountHere * HG + ambient) * absoption * _CloudColor;

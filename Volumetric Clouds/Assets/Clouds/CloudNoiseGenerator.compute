@@ -3,10 +3,15 @@
 RWStructuredBuffer<float> _ResultBuffer;
 uint _Resolution;
 float _CellAmount;
+float _Seed;
 
 float3 Hash(float3 p)
 {
     return frac(sin(dot(p, float3(12.9898f, 78.233f, 37.719f))) * 43758.5453f);
+}
+float Hash(float p)
+{
+    return frac(sin(dot(p, 12.9898f)) * 43758.5453f);
 }
 
 // https://docs.unity.com/en-us/engine/6000.7/script-reference/unityengine/mathf/repeat
@@ -15,10 +20,10 @@ float3 Repeat(float3 t, float3 length)
     return t - floor(t / length) * length;
 }
 
-float Voronoi(float3 uvw)
+float Voronoi(float3 uvw, int cellAmount)
 {
-    float3 cellID = floor(uvw * _CellAmount);  // cell ID like 2, 3, 0
-    float3 cellCoord = frac(uvw * _CellAmount) - 0.5f; // local coordinate within cell, like -0.5, 0.0, 0.9
+    float3 cellID = floor(uvw * cellAmount);  // cell ID like 2, 3, 0
+    float3 cellCoord = frac(uvw * cellAmount) - 0.5f; // local coordinate within cell, like -0.5, 0.0, 0.9
 
     float minDistanceFromCenter = 999.9f;
     for (float x = -1.0; x <= 1.0; x++)
@@ -26,7 +31,7 @@ float Voronoi(float3 uvw)
             for (float z = -1.0; z <= 1.0; z++)
             {
                 float3 neighborCellCoord = float3(x, y, z);
-                float3 WrappedPointInNeighboringCell = Repeat((cellID + neighborCellCoord), _CellAmount);
+                float3 WrappedPointInNeighboringCell = Repeat((cellID + neighborCellCoord), cellAmount);
                 float3 noise = Hash(WrappedPointInNeighboringCell);
                 float3 pointInNeighboringCell = neighborCellCoord + noise;
                 
@@ -35,6 +40,25 @@ float Voronoi(float3 uvw)
             }
 
     return 1 - minDistanceFromCenter;
+}
+
+float FractalVoronoi(float3 uvw, int cellAmount)
+{
+    float t = 0.0;
+
+    float freq = pow(2.0, 0.0);
+    float amp = pow(0.5, 3 - 0);
+    t += Voronoi(uvw, floor(cellAmount / freq)) * amp;
+    
+    freq = pow(2.0, 1.0);
+    amp = pow(0.5, 3 - 1);
+    t += Voronoi(uvw, floor(cellAmount / freq)) * amp;
+    
+    freq = pow(2.0, 2.0);
+    amp = pow(0.5, 3 - 2);
+    t += Voronoi(uvw, floor(cellAmount / freq)) * amp;
+
+    return t;
 }
 
 [numthreads(8,8,8)]
@@ -48,8 +72,9 @@ void FillWithRed (uint3 id : SV_DispatchThreadID)
     // moving in z skips whole slice of x and y elements
     uint index = (id.x) + (id.y * _Resolution) + (id.z * _Resolution * _Resolution);
     float3 uvw = (id + 0.5f) / _Resolution;
+    uvw += Hash(_Seed);
 
-    float voronoi = Voronoi(uvw);
+    float voronoi = FractalVoronoi(uvw, _CellAmount);
 
     _ResultBuffer[index] = voronoi;
 }

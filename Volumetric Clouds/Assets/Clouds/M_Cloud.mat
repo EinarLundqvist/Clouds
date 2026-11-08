@@ -35,17 +35,24 @@ Material:
         m_Texture: {fileID: 11700000, guid: 81c3e374f3e43864189bc11e811582d1, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _CloudNoise2:
+        m_Texture: {fileID: 11700000, guid: d086bffcf58591249a32e9d55d80afec, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DensityMultiplier: 2
+    - _DensityMultiplier: 1
     - _LightAbsorption: 1
     - _LightrayStepLength: 1
-    - _MaxMarchDistance: 200
-    - _NoiseScale: 0.03
-    - _NoiseThreshold: 0.5
-    - _PowderStregth: 0
-    - _Scattering: 0.8
-    - _StepLength: 1
+    - _MaxMarchDistance: 500
+    - _NoiseScale: 0.002
+    - _NoiseScale2: 0.0005
+    - _NoiseThreshold: 0.37
+    - _NoiseThreshold2: 0.416
+    - _PowderStregth: 1
+    - _Scattering: 0.7
+    - _ScatteringStrength: 0.104
+    - _StepLength: 5
     - _StepsTowardsLight: 7
     - _toLightSearchDistance: 15
     m_Colors:
