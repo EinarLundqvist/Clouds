@@ -4,11 +4,14 @@ using UnityEngine.UI;
 
 public class S_3DTextureGenerator : MonoBehaviour
 {
+    [SerializeField] private bool autoGenerate = false;
+    [Space]
     [SerializeField] private int resolution = 32;
     [SerializeField] TextureFormat textureFormat = TextureFormat.RFloat;
     [SerializeField] TextureWrapMode wrapMode = TextureWrapMode.Repeat;
     [SerializeField] FilterMode filterMode = FilterMode.Bilinear;
-    [SerializeField] private string savePath = "Assets/Clouds/CloudNoise.asset";
+    [SerializeField] private string savePath = "Assets/Clouds/";
+    [SerializeField] private string assetName = "MyCloudNoise";
     [SerializeField] private ComputeShader NoiseCompute;
     [HideInInspector] public Texture3D CloudTexture;
 
@@ -18,7 +21,8 @@ public class S_3DTextureGenerator : MonoBehaviour
 
     private void OnValidate()
     {
-        CreateTexture3D();
+        if (autoGenerate)
+            CreateTexture3D();
     }
     public void CreateTexture3D()
     {
@@ -46,15 +50,17 @@ public class S_3DTextureGenerator : MonoBehaviour
         // Apply the changes to the texture and upload the updated texture to the GPU
         texture.Apply();
 
+        string assetSavePath = savePath.EndsWith('/') ? savePath + assetName + ".asset" : savePath + '/' + assetName + ".asset";
+
         // Save the texture to your Unity Project
-        if (AssetDatabase.AssetPathExists(savePath))
+        if (AssetDatabase.AssetPathExists(assetSavePath))
         {
-            Texture3D existingTexture = AssetDatabase.LoadAssetAtPath<Texture3D>(savePath);
+            Texture3D existingTexture = AssetDatabase.LoadAssetAtPath<Texture3D>(assetSavePath);
             EditorUtility.CopySerialized(texture, existingTexture);
             AssetDatabase.SaveAssets();
         }
         else
-            AssetDatabase.CreateAsset(texture, savePath);
+            AssetDatabase.CreateAsset(texture, assetSavePath);
 
         CloudTexture = texture;
     }

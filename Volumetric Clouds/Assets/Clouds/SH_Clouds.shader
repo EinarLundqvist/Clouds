@@ -26,12 +26,18 @@ Shader "Custom/SH_Clouds"
         _CloudNoise("Cloud Noise", 3D) = "white" {}
         _ShapeNoiseThreshold ("Noise Threshold", Range(0.0, 1.0)) = 0.438
         _ShapeNoiseScale ("Noise Scale", float) = 3
-
+        
         _CloudNoise2("Detail Noise", 3D) = "white" {}
+        _UseDetailNoise ("Use Detail Noise", Range(0.0, 1.0)) = 1
         _DetailNoiseThreshold ("Detail Noise Threshold", Range(0.0, 1.0)) = 0.0
         _DetailNoiseScale ("Detail Noise Scale ", float) = 10
-        _UseDetailNoise ("Use Detail Noise", Range(0.0, 1.0)) = 1
         _DetailErotionStrength ("Detail Erotion Strength", Range(-1.0, 1.0)) = -0.228
+        
+        _CloudNoise3 ("Large mask noise", 3D) = "white" {}
+        _UseLargeMaskNoise ("Use large mask noise", Range(0.0, 1.0)) = 1
+        _LargeMaskNoiseThreshold ("Large mask noise threshold", Range(0.0, 1.0)) = 0.2
+        _LargeMaskNoiseScale ("Large mask noise scale", float) = 5
+        _LargeMaskSharpness ("Large mask sharpness", Range(0.0, 2.0)) = 0.0
     }
 
     SubShader
@@ -53,11 +59,13 @@ Shader "Custom/SH_Clouds"
             float3 boundsPosition;
             float3 boundsSize;
 
-            TEXTURE3D(_CloudNoise);
-            TEXTURE3D(_CloudNoise2);
-            TEXTURE2D(_Blue);
+            TEXTURE3D_FLOAT(_CloudNoise);
+            TEXTURE3D_FLOAT(_CloudNoise2);
+            TEXTURE3D_FLOAT(_CloudNoise3);
+            TEXTURE2D_FLOAT(_Blue);
             SAMPLER(sampler_CloudNoise);
             SAMPLER(sampler_CloudNoise2);
+            SAMPLER(sampler_CloudNoise3);
             SAMPLER(sampler_Blue);
 
             CBUFFER_START(UnityPerMaterial)
@@ -85,11 +93,17 @@ Shader "Custom/SH_Clouds"
                 float _ShapeNoiseThreshold;
                 float _ShapeNoiseScale;
 
-                // detail noise
+                // detailShapes noise
                 float _DetailNoiseThreshold;
                 float _DetailNoiseScale;
                 float _UseDetailNoise;
                 float _DetailErotionStrength;
+
+                // large mask nosie 
+                int _UseLargeMaskNoise;
+                float _LargeMaskNoiseThreshold;
+                float _LargeMaskNoiseScale;
+                float _LargeMaskSharpness;
             CBUFFER_END
 
             float max(float m, float a, float x)
@@ -146,23 +160,38 @@ Shader "Custom/SH_Clouds"
 
             float SampleDensity(float3 worldPosition)
             {
-                float3 uvw = worldPosition * _ShapeNoiseScale * 0.0001; //+ _Time.yyy * 0.03;
-                float bigCloudShapes = SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, uvw);
-                if (bigCloudShapes <= 0)
+                float LargeMask = 1.0;
+                if (_UseLargeMaskNoise)
+                {
+                    float3 largeUVW = worldPosition * _LargeMaskNoiseScale * 0.0001;
+                    LargeMask = saturate(SAMPLE_TEXTURE3D(_CloudNoise3, sampler_CloudNoise3, largeUVW) + _LargeMaskNoiseThreshold);
+
+                    float erosion = LargeMask * LargeMask * -_LargeMaskSharpness;
+                    
+                    LargeMask = saturate(LargeMask - erosion);
+
+                    if (LargeMask <= 0)
+                        return 0.0;
+                }
+
+
+                float3 shapeUVW = worldPosition * _ShapeNoiseScale * 0.0001; //+ _Time.yyy * 0.03;
+                float cloudShapes = SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, shapeUVW) * LargeMask;
+                if (cloudShapes <= 0)
                     return 0.0;
 
 
-                float detail = 1.0;
+                float detailShapes = 1.0;
                 if (_UseDetailNoise)
                 {
-                    float3 uvw2 = worldPosition * _DetailNoiseScale * 0.0001 + _Time.yyy * 0.01;
-                    detail = saturate(SAMPLE_TEXTURE3D(_CloudNoise2, sampler_CloudNoise2, uvw2) - _DetailNoiseThreshold);
+                    float3 detailUVW = worldPosition * _DetailNoiseScale * 0.0001 + _Time.yyy * 0.01;
+                    detailShapes = saturate(SAMPLE_TEXTURE3D(_CloudNoise2, sampler_CloudNoise2, detailUVW) - _DetailNoiseThreshold);
                 }
 
-                float edge = 1.0 - bigCloudShapes;
-                float erosion = detail * _DetailErotionStrength * edge * edge;
+                float edge = 1.0 - cloudShapes;
+                float erosion = detailShapes * edge * edge * _DetailErotionStrength;
                 
-                return saturate(bigCloudShapes - _ShapeNoiseThreshold - erosion) * _DensityMultiplier;
+                return saturate(cloudShapes - _ShapeNoiseThreshold - erosion) * _DensityMultiplier;
             }
 
             //                                                                         transmittance ↓      ↓ density

@@ -14,11 +14,13 @@ public class S_CloudNoiseGeneratorEditor : Editor
     {
         var root = new VisualElement();
 
+        root.Add(CreateProperty("autoGenerate"));
         root.Add(CreateProperty("resolution"));
         root.Add(CreateProperty("textureFormat"));
         root.Add(CreateProperty("wrapMode"));
         root.Add(CreateProperty("filterMode"));
         root.Add(CreateProperty("savePath"));
+        root.Add(CreateProperty("assetName"));
         root.Add(CreateProperty("NoiseCompute"));
         root.Add(CreateProperty("cellAmount"));
         root.Add(CreateProperty("seed"));
