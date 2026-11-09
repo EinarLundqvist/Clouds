@@ -45,37 +45,47 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DensityMultiplier: 0.66
+    - _DensityFalloffFromBounds: 196
+    - _DensityFalloffSmoothness: 328
+    - _DensityFarplaneFalloff: 10000
+    - _DensityMultiplier: 0.8
     - _DetailErotionStrength: -0.306
     - _DetailNoiseScale: 10
     - _DetailNoiseThreshold: 0
     - _ErotionStrength: -0.228
+    - _FarPlane: 30000
     - _LargeMaskNoiseScale: 0.94
     - _LargeMaskNoiseThreshold: 0.121
     - _LargeMaskSharpness: 1.28
     - _LightAbsorption: 1
-    - _LightrayStepLength: 10
-    - _MaxMarchDistance: 20000
+    - _LightrayStepLength: 15
+    - _MaxMarchDistance: 9666
+    - _MaxStepLength: 4000
     - _NoiseScale: 3
     - _NoiseScale2: 10.01
     - _NoiseThreshold: 0.438
     - _NoiseThreshold2: 0
     - _PowderStregth: 2
     - _Scattering: 0.7
-    - _ScatteringStrength: 0.094
+    - _ScatteringStrength: 0.14
     - _ShapeNoiseScale: 3
     - _ShapeNoiseThreshold: 0.438
-    - _StepLength: 100
+    - _SliceDetailFalloff: 1
+    - _StepLength: 10
+    - _StepLengthFalloff: 3
+    - _StepLengthFalloffSafeRadius: 500
     - _StepsTowardsLight: 7
+    - _TroughBoxMaxDistance: 20000
     - _UseDetailNoise: 1
     - _UseLargeMaskNoise: 1
     - _UseNoise: 1
     - _UseNoise2: 0.055
+    - _VisualizeStepLength: 0
     - _toLightSearchDistance: 100
     m_Colors:
     - _AmbientBottom: {r: 1, g: 1, b: 1, a: 1}
-    - _AmbientTop: {r: 0.46715912, g: 0.5116095, b: 0.5471698, a: 1}
+    - _AmbientTop: {r: 0.43794644, g: 0.476875, b: 0.545, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _CloudColor: {r: 0.8207547, g: 0.8207547, b: 0.8207547, a: 1}
+    - _CloudColor: {r: 0.933, g: 0.933, b: 0.933, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

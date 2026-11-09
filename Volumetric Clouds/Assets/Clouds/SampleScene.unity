@@ -323,13 +323,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.41900262, y: -0.11829713, z: 0.055162936, w: 0.89855427}
+  m_LocalRotation: {x: 0.4180845, y: -0.13239622, z: 0.061737366, w: 0.8965852}
   m_LocalPosition: {x: -5.1, y: 3, z: -7.3699994}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -15, z: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: -16.8, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,7 +393,7 @@ MonoBehaviour:
   boundingBox: {fileID: 1960489369}
   currentBounds:
     position: {x: 6.3898, y: 1282.1, z: 4.6502}
-    size: {x: 30000, y: 569.5, z: 30000}
+    size: {x: 300000, y: 1169.0696, z: 300000}
   mainLight: {fileID: 410087040}
   stepLength: 1.5
   maxMarchDistance: 13.9
@@ -588,7 +588,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::S_CloudRenderer
   fullscreenPass: {fileID: 2100000, guid: 29274085d71c3dd469cfdcc08a932f2e, type: 2}
   boundsBox: {fileID: 1960489369}
-  boundsSize: {x: 30000, y: 569.5, z: 30000}
+  boundsSize: {x: 300000, y: 1169.0696, z: 300000}
   boundsPosition: {x: 6.3898, y: 1282.1, z: 4.6502}
 --- !u!4 &984854352
 Transform:
@@ -697,7 +697,7 @@ MonoBehaviour:
   savePath: Assets/Clouds
   assetName: LargeCloudMask
   NoiseCompute: {fileID: 7200000, guid: 7266cc6de0d3a364080a6df02981cb59, type: 3}
-  CloudTexture: {fileID: 2096525291}
+  CloudTexture: {fileID: 2130008596}
   cellAmount: 11
   seed: 0.281
 --- !u!4 &1427594191
@@ -891,12 +891,12 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 6.3898, y: 1282.1, z: 4.6502}
-  m_LocalScale: {x: 30000, y: 569.5, z: 30000}
+  m_LocalScale: {x: 300000, y: 1169.0696, z: 300000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!117 &2096525291
+--- !u!117 &2130008596
 Texture3D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -5,8 +5,11 @@ Shader "Custom/SH_Clouds"
         // scatting & density
         _Scattering ("Scattering", Range(-1, 1)) = 0.7
         _ScatteringStrength ("Scattering Strength", Range(0.0, 1.0)) = 0.104
-        _PowderStregth ("Powder Strength", Range(0.0, 2.0)) = 0.709
+        _PowderStregth ("Powder Strength", Range(0.0, 3.0)) = 0.709
         _DensityMultiplier ("Density Multiplier", Range(0.0, 5.0)) = 0.66
+        _DensityFalloffFromBounds ("DensityFalloff from bounds", Range(0.01, 1000.0)) = 10
+        _DensityFalloffSmoothness ("DensityFalloff Smoothness", Range(0.01, 1000.0)) = 10
+        _DensityFarplaneFalloff ("Density farplane Falloff", Range(0.0, 10000.0)) = 0
 
         // cloud color
         _CloudColor ("Cloud Color", Color) = (0.8207547, 0.8207547, 0.8207547, 1)
@@ -14,13 +17,20 @@ Shader "Custom/SH_Clouds"
         _AmbientTop ("Ambient Bottom", Color) = (0.41, 0.4494652, 0.4823529, 1)
         
         // ray marching
-        _StepLength ("Step Length", Range(0.05, 100)) = 50
-        _MaxMarchDistance ("Max March Distance", float) = 3000
+        _StepLength ("Min Step Length", Range(10, 100)) = 50
+        _MaxStepLength ("Max Step Length", Range(100, 4000)) = 500
 
         //Light marching
-        _LightrayStepLength ("Lightray Length", Range(0.1, 50)) = 50
+        _LightrayStepLength ("Lightray Length", Range(5.0, 100.0)) = 50.0
         _toLightSearchDistance ("to Light Search Distance", int) = 100
-        _Blue ("Blue", 2D) = "white"
+        _Blue ("Blue", 2D) = "white" {}
+        
+        // march culling
+        _FarPlane ("Far Plane", float) = 4000.0
+        _TroughBoxMaxDistance ("Trough Box Max Distance", float) = 4000.0
+        _VisualizeStepLength ("Visualize StepLength", Range(0.0, 1.0)) = 0.0
+        _StepLengthFalloff ("Quality Falloff Exponent", Range(1, 10.0)) = 1.0
+        _StepLengthFalloffSafeRadius ("Quality Falloff Safe Radius", Range(0.0, 2000.0)) = 0.0
         
         // Noise settings
         _CloudNoise("Cloud Noise", 3D) = "white" {}
@@ -75,14 +85,24 @@ Shader "Custom/SH_Clouds"
                 float _ScatteringStrength;
                 float _PowderStregth;
                 float _DensityMultiplier;
+                float _DensityFalloffFromBounds;
+                float _DensityFalloffSmoothness;
+                float _DensityFarplaneFalloff;
                 
                 // ray maching
                 float _StepLength;
-                float _MaxMarchDistance;
+                float _MaxStepLength;
                 
                 // light ray maching
                 float _LightrayStepLength;
                 float _toLightSearchDistance;
+
+                // maching optimization
+                float _FarPlane;
+                float _StepLengthFalloff;
+                float _TroughBoxMaxDistance;
+                float _VisualizeStepLength;
+                float _StepLengthFalloffSafeRadius;
 
                 //color
                 float3 _CloudColor;
@@ -104,6 +124,7 @@ Shader "Custom/SH_Clouds"
                 float _LargeMaskNoiseThreshold;
                 float _LargeMaskNoiseScale;
                 float _LargeMaskSharpness;
+
             CBUFFER_END
 
             float max(float m, float a, float x)
@@ -158,6 +179,22 @@ Shader "Custom/SH_Clouds"
                 return ((1.0 - g2) / pow(1.0 + g2 - 2.0 * g * cosTheta, 1.5)) * _ScatteringStrength;
             }
 
+            float BoundsFalloffMask(float3 worldPosition)
+            {
+                float3 offsetFromCenterOfBounds = worldPosition - boundsPosition;
+                float3 maxDistToBounds = boundsSize - abs(offsetFromCenterOfBounds);
+                float3 falloffToBounds = smoothstep(-_DensityFalloffSmoothness, _DensityFalloffFromBounds, maxDistToBounds);
+                return falloffToBounds.x * falloffToBounds.y * falloffToBounds.z;
+            }
+
+            float FarplaneFalloff(float3 worldPosition)
+            {
+                float distanceToPos = length(worldPosition - GetCameraPositionWS());
+                float fadeStart = _FarPlane - _DensityFarplaneFalloff;
+                
+                return pow(smoothstep(fadeStart, _FarPlane, distanceToPos), 10);
+            }
+
             float SampleDensity(float3 worldPosition)
             {
                 float LargeMask = 1.0;
@@ -170,14 +207,17 @@ Shader "Custom/SH_Clouds"
                     
                     LargeMask = saturate(LargeMask - erosion);
 
-                    if (LargeMask <= 0)
+                    if (LargeMask == 0)
                         return 0.0;
                 }
 
 
+                float boundsFalloff = 1.0 - BoundsFalloffMask(worldPosition);
+                float farplaneFalloff = FarplaneFalloff(worldPosition);
+
                 float3 shapeUVW = worldPosition * _ShapeNoiseScale * 0.0001; //+ _Time.yyy * 0.03;
-                float cloudShapes = SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, shapeUVW) * LargeMask;
-                if (cloudShapes <= 0)
+                float cloudShapes = saturate(SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, shapeUVW) * LargeMask - boundsFalloff - farplaneFalloff);
+                if (cloudShapes == 0)
                     return 0.0;
 
 
@@ -192,6 +232,10 @@ Shader "Custom/SH_Clouds"
                 float erosion = detailShapes * edge * edge * _DetailErotionStrength;
                 
                 return saturate(cloudShapes - _ShapeNoiseThreshold - erosion) * _DensityMultiplier;
+            }
+            float Hash(float p)
+            {
+                return frac(sin(dot(p, 12.9898f)) * 43758.5453f);
             }
 
             //                                                                         transmittance ↓      ↓ density
@@ -230,6 +274,14 @@ Shader "Custom/SH_Clouds"
                 
                 return lerp(_AmbientBottom, _AmbientTop, 1 - invLerp);
             }
+            // adapted from https://www.mattiasstrand.com/posts/volumetric-fog/
+            float AdjustStepLength(float StepLength, float distanceFromCamera)
+            {
+                float beyondSafeDistance = max(distanceFromCamera - _StepLengthFalloffSafeRadius, 0.0); // distance farther out then safe
+                float t = saturate(beyondSafeDistance / _FarPlane); // normalized distance between farplane and 0.0, 0 beeing safe distance
+                float warpedT = pow(t, _StepLengthFalloff);
+                return lerp(StepLength, _MaxStepLength, warpedT);
+            }
 
             half4 frag(Varyings IN) : SV_Target
             {
@@ -240,6 +292,8 @@ Shader "Custom/SH_Clouds"
                 float3 rayDir = WorldPos - rayOrigin;
                 float rayLength = length(rayDir);
                 rayDir /= rayLength;
+
+                rayLength = min(rayLength, _FarPlane); // limit everything to a far plane
 
                 float2 intersect = RaycastIntersectBox(boundsPosition, boundsSize, rayOrigin, rayDir);
                 float distanceToBox = intersect.x;
@@ -256,25 +310,53 @@ Shader "Custom/SH_Clouds"
                 float3 lightDir = mainLight.direction; // WS direction from surface to light
                 float HG = HenyeyGreenstein(lightDir, rayDir, _Scattering);
 
+                float3 debugColor = float3(0, 0, 0);
 
                 float3 transmittance = 1.0;
                 float3 inScattering = 0.0;
                 
                 uint totalFrameCount = (uint)(_Time.y * 144.0); // 144 should idealy be current FPS
-                float debanding = BlueNoise(IN.texcoord, totalFrameCount);
+                float debanding = _VisualizeStepLength ? 0.0 : BlueNoise(IN.texcoord, totalFrameCount);
 
-                float distanceTraveled = distanceToBox + debanding * _StepLength;
-                float maxRayDist = min(distanceToBox + _MaxMarchDistance, maxDistanceToBox);
+                float firstStep = AdjustStepLength(_StepLength, distanceToBox);
+                float distanceTraveled = distanceToBox + debanding * firstStep;
+                float maxRayDist = min(maxDistanceToBox, distanceToBox + _TroughBoxMaxDistance);
                 
                 [loop] while (distanceTraveled < maxRayDist)
                 {
                     float3 rayPosition = rayOrigin + rayDir * distanceTraveled;
-                    distanceTraveled += _StepLength;
+                    
+                    float adjustedStepLength = AdjustStepLength(_StepLength, distanceTraveled);
+                    distanceTraveled += adjustedStepLength;
 
                     float density = SampleDensity(rayPosition);
                     if (density <= 0.0)
                         continue;
                     
+                    // debug coloring
+                    if (_VisualizeStepLength)
+                    {
+                        float t = distanceToBox;
+                        
+                        uint idx = 0;
+                        [loop] while (t < distanceTraveled && idx < 4128) // cap for safety
+                        {
+                            t += AdjustStepLength(_StepLength, t);
+                            idx++;
+                        }
+
+                        float seed = (float)idx;
+                        float3 rndColor = float3(Hash(seed), Hash(seed + 13.37), Hash(seed + 67.420));
+                        debugColor = rndColor * (1 - (distanceTraveled / maxRayDist));
+
+                        if (t < _StepLengthFalloffSafeRadius)
+                            debugColor = float4(1.0, 0.0, 0.0, 1.0);
+
+                        return float4(debugColor, 1.0);
+                    }
+                    // debug coloring end
+
+
                     // start marching towards lightsource
                     float lightrayTransmittance = 1.0;
                     
@@ -296,20 +378,22 @@ Shader "Custom/SH_Clouds"
                     }
                     // done matching towards lightsource
                     
-                    float beerLambert = BeerLambert(density * _StepLength);
+                    float beerLambert = BeerLambert(density * adjustedStepLength);
                     float absoption = 1.0 - beerLambert;
                     
-                    float powder = lerp(1.0, Powder(density * _StepLength), -_PowderStregth);
+                    float powder = lerp(1.0, Powder(density * adjustedStepLength), -_PowderStregth);
                     float3 sunAmountHere = mainLight.color * lightrayTransmittance * powder;
                     float3 ambient = ambientLighting(rayPosition);
                     float3 scatter = (sunAmountHere * HG + ambient) * absoption * _CloudColor;
                     
                     inScattering += transmittance * scatter;
                     transmittance *= beerLambert;
-
                 }
 
-                return float4(backgroundColor.rgb * transmittance + inScattering, 1.0);
+                float3 cloudColor = backgroundColor.rgb * transmittance + inScattering;
+                if (_VisualizeStepLength) cloudColor *= debugColor;
+
+                return float4(cloudColor, 1.0);
             }
             ENDHLSL
         }
