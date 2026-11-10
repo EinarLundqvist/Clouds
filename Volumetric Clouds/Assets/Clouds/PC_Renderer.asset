@@ -25,8 +25,8 @@ MonoBehaviour:
     probeSamplingDebugTexture: {fileID: 2800000, guid: 24ec0e140fb444a44ab96ee80844e18e, type: 3}
     probeVolumeBlendStatesCS: {fileID: 7200000, guid: b9a23f869c4fd45f19c5ada54dd82176, type: 3}
   m_RendererFeatures:
-  - {fileID: 4162853247661404749}
-  m_RendererFeatureMap: 4d72f016f96cc539
+  - {fileID: 2644101284497741382}
+  m_RendererFeatureMap: 4656a4f41bbcb124
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -55,7 +55,7 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
---- !u!114 &4162853247661404749
+--- !u!114 &2644101284497741382
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -64,14 +64,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
-  m_Name: FullScreenPassRendererFeature
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Script: {fileID: 11500000, guid: 7a962bdfa439ebd4d9df1527c738a73b, type: 3}
+  m_Name: S_CloudRenderPass
+  m_EditorClassIdentifier: Assembly-CSharp::S_CloudRenderPass
   m_Active: 1
-  injectionPoint: 550
-  fetchColorBuffer: 1
-  requirements: 0
-  passMaterial: {fileID: 2100000, guid: 29274085d71c3dd469cfdcc08a932f2e, type: 2}
-  passIndex: 0
-  bindDepthStencilAttachment: 0
-  m_Version: 1
+  material: {fileID: 2100000, guid: 29274085d71c3dd469cfdcc08a932f2e, type: 2}
+  downSampleFactor: 2
+--- !u!114 &6248357224422833712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: CloudRenderPass
+  m_EditorClassIdentifier: Assembly-CSharp::CloudRenderPass

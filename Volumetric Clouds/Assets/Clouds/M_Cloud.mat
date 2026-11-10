@@ -12,7 +12,9 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _USEDETAILNOISE_ON
+  - _USELARGEMASKNOISE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -32,47 +34,53 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _CloudNoise:
-        m_Texture: {fileID: 11700000, guid: 81c3e374f3e43864189bc11e811582d1, type: 2}
+        m_Texture: {fileID: 11700000, guid: 076e48bc4b67bc34a924a7e5eb83c02f, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _CloudNoise2:
-        m_Texture: {fileID: 11700000, guid: d086bffcf58591249a32e9d55d80afec, type: 2}
+        m_Texture: {fileID: 11700000, guid: 273e0097460d1ce47b77f0c3bd72ba9d, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _CloudNoise3:
-        m_Texture: {fileID: 11700000, guid: 0cd3b6701c3db374c95c0056c6f0b3b5, type: 2}
+        m_Texture: {fileID: 11700000, guid: 21a77ef330b6c93439562ef693b159ba, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _DensityFalloffFromBounds: 196
     - _DensityFalloffSmoothness: 328
-    - _DensityFarplaneFalloff: 10000
-    - _DensityMultiplier: 0.8
+    - _DensityFarplaneFalloff: 0
+    - _DensityMultiplier: 0.7
     - _DetailErotionStrength: -0.306
+    - _DetailNoiseRenderDistance: 14238
     - _DetailNoiseScale: 10
     - _DetailNoiseThreshold: 0
+    - _DetailNoiseUseDistance: 8632
     - _ErotionStrength: -0.228
     - _FarPlane: 30000
     - _LargeMaskNoiseScale: 0.94
     - _LargeMaskNoiseThreshold: 0.121
     - _LargeMaskSharpness: 1.28
     - _LightAbsorption: 1
-    - _LightrayStepLength: 15
+    - _LightmachingRenderDistance: 13115
+    - _LightrayStepFalloffSafeRadius: 500
+    - _LightrayStepLength: 5
+    - _LightrayStepLengthFalloff: 1
+    - _MaxLightrayStepLength: 100
     - _MaxMarchDistance: 9666
-    - _MaxStepLength: 4000
+    - _MaxStepLength: 200
     - _NoiseScale: 3
     - _NoiseScale2: 10.01
     - _NoiseThreshold: 0.438
     - _NoiseThreshold2: 0
-    - _PowderStregth: 2
+    - _PowderStregth: 3
     - _Scattering: 0.7
-    - _ScatteringStrength: 0.14
+    - _ScatteringStrength: 0.175
     - _ShapeNoiseScale: 3
     - _ShapeNoiseThreshold: 0.438
     - _SliceDetailFalloff: 1
     - _StepLength: 10
-    - _StepLengthFalloff: 3
+    - _StepLengthFalloff: 2
     - _StepLengthFalloffSafeRadius: 500
     - _StepsTowardsLight: 7
     - _TroughBoxMaxDistance: 20000
@@ -81,7 +89,9 @@ Material:
     - _UseNoise: 1
     - _UseNoise2: 0.055
     - _VisualizeStepLength: 0
-    - _toLightSearchDistance: 100
+    - _maxLightmarchDistance: 75
+    - _maxToLightSearchDistance: 50
+    - _toLightSearchDistance: 75
     m_Colors:
     - _AmbientBottom: {r: 1, g: 1, b: 1, a: 1}
     - _AmbientTop: {r: 0.43794644, g: 0.476875, b: 0.545, a: 1}

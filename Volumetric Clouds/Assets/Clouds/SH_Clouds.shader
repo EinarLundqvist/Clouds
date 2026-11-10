@@ -2,49 +2,70 @@ Shader "Custom/SH_Clouds"
 {
     Properties
     {
-        // scatting & density
+        [Space(10)]
+        [Header(Scattering and density)]
+        [Space(5)]
         _Scattering ("Scattering", Range(-1, 1)) = 0.7
         _ScatteringStrength ("Scattering Strength", Range(0.0, 1.0)) = 0.104
         _PowderStregth ("Powder Strength", Range(0.0, 3.0)) = 0.709
         _DensityMultiplier ("Density Multiplier", Range(0.0, 5.0)) = 0.66
         _DensityFalloffFromBounds ("DensityFalloff from bounds", Range(0.01, 1000.0)) = 10
         _DensityFalloffSmoothness ("DensityFalloff Smoothness", Range(0.01, 1000.0)) = 10
-        _DensityFarplaneFalloff ("Density farplane Falloff", Range(0.0, 10000.0)) = 0
+        _DensityFarplaneFalloff ("Density farplane Falloff", Range(0.0, 100000.0)) = 0
 
-        // cloud color
+        [Space(10)]
+        [Header(Cloud color)]
+        [Space(5)]
         _CloudColor ("Cloud Color", Color) = (0.8207547, 0.8207547, 0.8207547, 1)
         _AmbientBottom ("Ambient Top", Color) = (1, 1, 1, 1)
         _AmbientTop ("Ambient Bottom", Color) = (0.41, 0.4494652, 0.4823529, 1)
         
-        // ray marching
+        [Space(10)]
+        [Header(Ray marching)]
+        [Space(5)]
         _StepLength ("Min Step Length", Range(10, 100)) = 50
         _MaxStepLength ("Max Step Length", Range(100, 4000)) = 500
-
-        //Light marching
-        _LightrayStepLength ("Lightray Length", Range(5.0, 100.0)) = 50.0
-        _toLightSearchDistance ("to Light Search Distance", int) = 100
-        _Blue ("Blue", 2D) = "white" {}
-        
-        // march culling
-        _FarPlane ("Far Plane", float) = 4000.0
-        _TroughBoxMaxDistance ("Trough Box Max Distance", float) = 4000.0
-        _VisualizeStepLength ("Visualize StepLength", Range(0.0, 1.0)) = 0.0
-        _StepLengthFalloff ("Quality Falloff Exponent", Range(1, 10.0)) = 1.0
+        _StepLengthFalloff ("Quality Falloff Exponent", Range(1.0, 10.0)) = 1.0
         _StepLengthFalloffSafeRadius ("Quality Falloff Safe Radius", Range(0.0, 2000.0)) = 0.0
         
-        // Noise settings
+        [Space(10)]
+        [Header(Light marching)]
+        [Space(5)]
+        _maxLightmarchDistance ("max Lightmarch Distance", Range(0.0, 200.0)) = 100.0
+        [Space(8)]
+        _LightrayStepLength ("Lightray Length", Range(5.0, 50.0)) = 10.0
+        _MaxLightrayStepLength ("Max Lightray Length", Range(20.0, 200.0)) = 100.0
+        [Space(8)]
+        _LightrayStepLengthFalloff ("Lightmarch Falloff Exponent", Range(1.0, 10.0)) = 1.0
+        _LightrayStepFalloffSafeRadius ("Lightray Step Falloff Safe Radius", Range(0.0, 2000.0)) = 0.0
+        [Space(8)]
+        _Blue ("Blue", 2D) = "white" {}
+        
+        [Space(10)]
+        [Header(Optimization)]
+        [Space(5)]
+        _FarPlane ("Far Plane", float) = 4000.0
+        _TroughBoxMaxDistance ("Trough Box Max Distance", float) = 4000.0
+        [Toggle] _VisualizeStepLength ("Visualize StepLength", Range(0.0, 1.0)) = 0.0
+        
+        [Space(20)]
+        [Header(Noise)]
+        [Space(5)]
         _CloudNoise("Cloud Noise", 3D) = "white" {}
         _ShapeNoiseThreshold ("Noise Threshold", Range(0.0, 1.0)) = 0.438
         _ShapeNoiseScale ("Noise Scale", float) = 3
         
+        [Space(20)]
         _CloudNoise2("Detail Noise", 3D) = "white" {}
-        _UseDetailNoise ("Use Detail Noise", Range(0.0, 1.0)) = 1
+        [Toggle] _UseDetailNoise ("Use Detail Noise", Range(0.0, 1.0)) = 1
         _DetailNoiseThreshold ("Detail Noise Threshold", Range(0.0, 1.0)) = 0.0
         _DetailNoiseScale ("Detail Noise Scale ", float) = 10
         _DetailErotionStrength ("Detail Erotion Strength", Range(-1.0, 1.0)) = -0.228
+        _DetailNoiseRenderDistance ("Detail Noise render distance", Range(0.0, 50000)) = 0.0
         
+        [Space(20)]
         _CloudNoise3 ("Large mask noise", 3D) = "white" {}
-        _UseLargeMaskNoise ("Use large mask noise", Range(0.0, 1.0)) = 1
+        [Toggle] _UseLargeMaskNoise ("Use large mask noise", Range(0.0, 1.0)) = 1
         _LargeMaskNoiseThreshold ("Large mask noise threshold", Range(0.0, 1.0)) = 0.2
         _LargeMaskNoiseScale ("Large mask noise scale", float) = 5
         _LargeMaskSharpness ("Large mask sharpness", Range(0.0, 2.0)) = 0.0
@@ -62,8 +83,8 @@ Shader "Custom/SH_Clouds"
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             float3 boundsPosition;
@@ -94,8 +115,11 @@ Shader "Custom/SH_Clouds"
                 float _MaxStepLength;
                 
                 // light ray maching
+                float _maxLightmarchDistance;
                 float _LightrayStepLength;
-                float _toLightSearchDistance;
+                float _MaxLightrayStepLength;
+                float _LightrayStepLengthFalloff;
+                float _LightrayStepFalloffSafeRadius;
 
                 // maching optimization
                 float _FarPlane;
@@ -118,6 +142,7 @@ Shader "Custom/SH_Clouds"
                 float _DetailNoiseScale;
                 float _UseDetailNoise;
                 float _DetailErotionStrength;
+                float _DetailNoiseRenderDistance;
 
                 // large mask nosie 
                 int _UseLargeMaskNoise;
@@ -187,12 +212,17 @@ Shader "Custom/SH_Clouds"
                 return falloffToBounds.x * falloffToBounds.y * falloffToBounds.z;
             }
 
-            float FarplaneFalloff(float3 worldPosition)
+            float FarplaneFalloff(float3 worldPosition, float3 cameraPos)
             {
-                float distanceToPos = length(worldPosition - GetCameraPositionWS());
+                float distanceToPos = length(worldPosition - cameraPos);
                 float fadeStart = _FarPlane - _DensityFarplaneFalloff;
                 
-                return pow(smoothstep(fadeStart, _FarPlane, distanceToPos), 10);
+                return pow(smoothstep(fadeStart, _FarPlane, distanceToPos), 2);
+            }
+
+            bool isDistanceFromCamera(float checkDistance, float3 worldPosition, float3 cameraPosition)
+            {
+                return checkDistance > length(worldPosition - cameraPosition);
             }
 
             float SampleDensity(float3 worldPosition)
@@ -212,17 +242,17 @@ Shader "Custom/SH_Clouds"
                 }
 
 
+                float3 cameraPosition = GetCameraPositionWS();
                 float boundsFalloff = 1.0 - BoundsFalloffMask(worldPosition);
-                float farplaneFalloff = FarplaneFalloff(worldPosition);
+                float farplaneFalloff = FarplaneFalloff(worldPosition, cameraPosition);
 
                 float3 shapeUVW = worldPosition * _ShapeNoiseScale * 0.0001; //+ _Time.yyy * 0.03;
                 float cloudShapes = saturate(SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, shapeUVW) * LargeMask - boundsFalloff - farplaneFalloff);
                 if (cloudShapes == 0)
                     return 0.0;
 
-
                 float detailShapes = 1.0;
-                if (_UseDetailNoise)
+                if (_UseDetailNoise && isDistanceFromCamera(_DetailNoiseRenderDistance, worldPosition, cameraPosition))
                 {
                     float3 detailUVW = worldPosition * _DetailNoiseScale * 0.0001 + _Time.yyy * 0.01;
                     detailShapes = saturate(SAMPLE_TEXTURE3D(_CloudNoise2, sampler_CloudNoise2, detailUVW) - _DetailNoiseThreshold);
@@ -261,9 +291,9 @@ Shader "Custom/SH_Clouds"
                 return frac(noise + float(totalFrameCount) * goldenRatioCondjugate);
             }
 
-            float3 ambientLighting(float3 worldSamplePosition)
+            float3 ambientLighting(float3 worldPosition)
             {
-                float worldPositionY = worldSamplePosition.y;
+                float worldPositionY = worldPosition.y;
                 float boundsMiddleY = boundsPosition.y;
                 float halfHeight = boundsSize.y;
 
@@ -275,12 +305,47 @@ Shader "Custom/SH_Clouds"
                 return lerp(_AmbientBottom, _AmbientTop, 1 - invLerp);
             }
             // adapted from https://www.mattiasstrand.com/posts/volumetric-fog/
-            float AdjustStepLength(float StepLength, float distanceFromCamera)
+            float AdjustStepLength(float originalStepLength, float distanceFromCamera)
             {
                 float beyondSafeDistance = max(distanceFromCamera - _StepLengthFalloffSafeRadius, 0.0); // distance farther out then safe
                 float t = saturate(beyondSafeDistance / _FarPlane); // normalized distance between farplane and 0.0, 0 beeing safe distance
                 float warpedT = pow(t, _StepLengthFalloff);
-                return lerp(StepLength, _MaxStepLength, warpedT);
+                return lerp(originalStepLength, _MaxStepLength, warpedT);
+            }
+            
+            float AdjustLightStepLength(float originalStepLength, float normalizedDistanceFromCamera)
+            {
+                float beyondSafeDistance = max(normalizedDistanceFromCamera * _FarPlane - _LightrayStepFalloffSafeRadius, 0.0); // distance farther out then safe
+                float t = saturate(beyondSafeDistance / _FarPlane); // normalized distance between farplane and 0.0, 0 beeing safe distance
+                float warpedT = pow(t, _LightrayStepLengthFalloff);
+                return lerp(originalStepLength, _MaxLightrayStepLength, warpedT);
+            }
+
+            float TowardsLightRaymarch(float3 lightDir, float debanding, float3 rayPosition, float cameraDistance)
+            {
+                // start marching towards lightsource
+                float lightrayTransmittance = 1.0;
+                float3 lightrayOrigin = rayPosition;
+                
+                float adjustedStepLength = AdjustLightStepLength(_LightrayStepLength, cameraDistance / _FarPlane);
+                
+                float distanceToLightTraveled = debanding * adjustedStepLength; // increment avoids sampling at known position
+                float distanceWithinBox = RaycastIntersectBox(boundsPosition, boundsSize, lightrayOrigin, lightDir).y;
+                float maxLightMarchDistance = min(_maxLightmarchDistance, distanceWithinBox - adjustedStepLength);
+                
+                [loop] while (distanceToLightTraveled < maxLightMarchDistance)
+                {
+                    distanceToLightTraveled += adjustedStepLength;
+                    
+                    float3 lightRayPosition = lightrayOrigin + lightDir * distanceToLightTraveled;
+                    
+                    float density = SampleDensity(lightRayPosition);
+                    float beerLambert = BeerLambert(density * adjustedStepLength);
+                    lightrayTransmittance *= beerLambert;
+                    
+                }
+                // done matching towards lightsource
+                return lightrayTransmittance;
             }
 
             half4 frag(Varyings IN) : SV_Target
@@ -294,16 +359,15 @@ Shader "Custom/SH_Clouds"
                 rayDir /= rayLength;
 
                 rayLength = min(rayLength, _FarPlane); // limit everything to a far plane
-
+ 
                 float2 intersect = RaycastIntersectBox(boundsPosition, boundsSize, rayOrigin, rayDir);
                 float distanceToBox = intersect.x;
                 float distanceWithinBox = intersect.y;
                 float maxDistanceToBox = distanceToBox + distanceWithinBox;
  
                 // Early exit if not intersecting with bounding box
-                half4 backgroundColor = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, IN.texcoord);
                 if (distanceToBox > rayLength ||  distanceWithinBox == 0) //isnt infront, or Ray dosent intersect with bouding box
-                    return backgroundColor;
+                    return half4(0.0, 0.0, 0.0, 1.0);
 
                 
                 Light mainLight = GetMainLight();
@@ -312,7 +376,7 @@ Shader "Custom/SH_Clouds"
 
                 float3 debugColor = float3(0, 0, 0);
 
-                float3 transmittance = 1.0;
+                float transmittance = 1.0;
                 float3 inScattering = 0.0;
                 
                 uint totalFrameCount = (uint)(_Time.y * 144.0); // 144 should idealy be current FPS
@@ -320,7 +384,7 @@ Shader "Custom/SH_Clouds"
 
                 float firstStep = AdjustStepLength(_StepLength, distanceToBox);
                 float distanceTraveled = distanceToBox + debanding * firstStep;
-                float maxRayDist = min(maxDistanceToBox, distanceToBox + _TroughBoxMaxDistance);
+                float maxRayDist = min(maxDistanceToBox, min(distanceToBox + _TroughBoxMaxDistance, rayLength));
                 
                 [loop] while (distanceTraveled < maxRayDist)
                 {
@@ -350,36 +414,16 @@ Shader "Custom/SH_Clouds"
                         debugColor = rndColor * (1 - (distanceTraveled / maxRayDist));
 
                         if (t < _StepLengthFalloffSafeRadius)
-                            debugColor = float4(1.0, 0.0, 0.0, 1.0);
+                            debugColor = float4(1.0, 0.0, 0.0, 0.0);
 
                         return float4(debugColor, 1.0);
                     }
                     // debug coloring end
-
-
-                    // start marching towards lightsource
-                    float lightrayTransmittance = 1.0;
                     
-                    float3 lightrayDir = lightDir;
-                    float distanceToLightTraveled = frac(debanding * 987.6543) * _LightrayStepLength; // increment avoids sampling at known position
-                    float distanceWithinBox = RaycastIntersectBox(boundsPosition, boundsSize, rayPosition, lightrayDir).y;
-                    float maxLightMarchDistance = min(_toLightSearchDistance, distanceWithinBox - _LightrayStepLength);
-                    
-                    [loop] while (distanceToLightTraveled < maxLightMarchDistance)
-                    {
-                        distanceToLightTraveled += _LightrayStepLength; 
-                        
-                        float3 lightRayPosition = rayPosition + lightrayDir * distanceToLightTraveled;
-                        
-                        float density = SampleDensity(lightRayPosition);
-                        float beerLambert = BeerLambert(density * _LightrayStepLength);
-                        lightrayTransmittance *= beerLambert;
-                        
-                    }
-                    // done matching towards lightsource
+                    float lightrayTransmittance = TowardsLightRaymarch(lightDir, frac(debanding * 987.6543), rayPosition, distanceTraveled); // reshash debanding 
                     
                     float beerLambert = BeerLambert(density * adjustedStepLength);
-                    float absoption = 1.0 - beerLambert;
+                    float absoption = 1.0 - beerLambert; // absoption is oposite of transmittance
                     
                     float powder = lerp(1.0, Powder(density * adjustedStepLength), -_PowderStregth);
                     float3 sunAmountHere = mainLight.color * lightrayTransmittance * powder;
@@ -390,10 +434,35 @@ Shader "Custom/SH_Clouds"
                     transmittance *= beerLambert;
                 }
 
-                float3 cloudColor = backgroundColor.rgb * transmittance + inScattering;
-                if (_VisualizeStepLength) cloudColor *= debugColor;
+                float3 cloudColor = _VisualizeStepLength ? debugColor : inScattering;
+                float alpha = (transmittance.r + transmittance.r + transmittance.r) * (1.0 / 3.0);
+                if (_VisualizeStepLength)
+                {
+                    alpha = 1 - (cloudColor.r + cloudColor.g + cloudColor.b) * (1 / 3);
+                    cloudColor = (cloudColor.r + cloudColor.g + cloudColor.b) * (1 / 3);
+                }
+                
 
-                return float4(cloudColor, 1.0);
+                return float4(cloudColor, alpha);
+            }
+            ENDHLSL
+        }
+        Pass
+        {
+            ZTest Always 
+            ZWrite Off 
+            Cull Off
+            Blend One SrcAlpha
+            HLSLPROGRAM
+            #pragma vertex Vert
+            #pragma fragment frag
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+
+            half4 frag(Varyings IN) : SV_Target
+            {
+                return SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, IN.texcoord);
             }
             ENDHLSL
         }

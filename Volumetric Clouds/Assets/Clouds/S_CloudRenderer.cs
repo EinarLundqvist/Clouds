@@ -3,7 +3,6 @@ using UnityEngine;
 [ExecuteAlways]
 public class S_CloudRenderer : MonoBehaviour
 {
-    
     [SerializeField] private Material fullscreenPass;
     [SerializeField] private Transform boundsBox;
     [SerializeField] private Vector3 boundsSize = Vector3.zero;
