@@ -32,6 +32,8 @@ Shader "Custom/SH_Clouds"
         [Header(Light marching)]
         [Space(5)]
         _maxLightmarchDistance ("max Lightmarch Distance", Range(0.0, 200.0)) = 100.0
+        [Space(5)]
+        _sampelEveryNSteps ("sample every n steps (skip samples)", Range(0, 4)) = 1
         [Space(8)]
         _LightrayStepLength ("Lightray Length", Range(5.0, 50.0)) = 10.0
         _MaxLightrayStepLength ("Max Lightray Length", Range(20.0, 200.0)) = 100.0
@@ -47,6 +49,8 @@ Shader "Custom/SH_Clouds"
         _FarPlane ("Far Plane", float) = 4000.0
         _TroughBoxMaxDistance ("Trough Box Max Distance", float) = 4000.0
         [Toggle] _VisualizeStepLength ("Visualize StepLength", Range(0.0, 1.0)) = 0.0
+        _DensityThreshold ("raymarch max density acculmulation threshold", Range(0.0, 0.1)) = 0.03
+        _LightmarchDensityThreshold ("Lightmarch max density acculmulation threshold", Range(0.0, 0.1)) = 0.03
         
         [Space(20)]
         [Header(Noise)]
@@ -87,8 +91,9 @@ Shader "Custom/SH_Clouds"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-            float3 boundsPosition;
-            float3 boundsSize;
+            float3 _BoundsPosition;
+            float3 _BoundsSize;
+            float4 _CloudRTSize;
 
             TEXTURE3D_FLOAT(_CloudNoise);
             TEXTURE3D_FLOAT(_CloudNoise2);
@@ -116,17 +121,20 @@ Shader "Custom/SH_Clouds"
                 
                 // light ray maching
                 float _maxLightmarchDistance;
+                int _sampelEveryNSteps;
                 float _LightrayStepLength;
                 float _MaxLightrayStepLength;
                 float _LightrayStepLengthFalloff;
                 float _LightrayStepFalloffSafeRadius;
 
-                // maching optimization
+                // optimization
                 float _FarPlane;
                 float _StepLengthFalloff;
                 float _TroughBoxMaxDistance;
                 float _VisualizeStepLength;
                 float _StepLengthFalloffSafeRadius;
+                float _DensityThreshold;
+                float _LightmarchDensityThreshold;
 
                 //color
                 float3 _CloudColor;
@@ -206,8 +214,8 @@ Shader "Custom/SH_Clouds"
 
             float BoundsFalloffMask(float3 worldPosition)
             {
-                float3 offsetFromCenterOfBounds = worldPosition - boundsPosition;
-                float3 maxDistToBounds = boundsSize - abs(offsetFromCenterOfBounds);
+                float3 offsetFromCenterOfBounds = worldPosition - _BoundsPosition;
+                float3 maxDistToBounds = _BoundsSize - abs(offsetFromCenterOfBounds);
                 float3 falloffToBounds = smoothstep(-_DensityFalloffSmoothness, _DensityFalloffFromBounds, maxDistToBounds);
                 return falloffToBounds.x * falloffToBounds.y * falloffToBounds.z;
             }
@@ -227,6 +235,13 @@ Shader "Custom/SH_Clouds"
 
             float SampleDensity(float3 worldPosition)
             {
+                float3 cameraPosition = GetCameraPositionWS();
+                float boundsFalloff = 1.0 - BoundsFalloffMask(worldPosition);
+                float farplaneFalloff = FarplaneFalloff(worldPosition, cameraPosition);
+                
+                if (boundsFalloff + farplaneFalloff >= 1.0)
+                    return 0.0;
+
                 float LargeMask = 1.0;
                 if (_UseLargeMaskNoise)
                 {
@@ -242,9 +257,6 @@ Shader "Custom/SH_Clouds"
                 }
 
 
-                float3 cameraPosition = GetCameraPositionWS();
-                float boundsFalloff = 1.0 - BoundsFalloffMask(worldPosition);
-                float farplaneFalloff = FarplaneFalloff(worldPosition, cameraPosition);
 
                 float3 shapeUVW = worldPosition * _ShapeNoiseScale * 0.0001; //+ _Time.yyy * 0.03;
                 float cloudShapes = saturate(SAMPLE_TEXTURE3D(_CloudNoise, sampler_CloudNoise, shapeUVW) * LargeMask - boundsFalloff - farplaneFalloff);
@@ -284,9 +296,9 @@ Shader "Custom/SH_Clouds"
             {
                 float2 textureResolution = float2(64, 64);
                 float2 textureResReciprocal = 1.0 / textureResolution;
-                const float goldenRatioCondjugate = 0.6180339887;
+                const float goldenRatioCondjugate = 0.6180339887; // using a low discrepancy sequence for better jittering https://en.wikipedia.org/wiki/Low-discrepancy_sequence
 
-                float2 aspectUV = uv * _ScreenParams.xy * textureResReciprocal; // Screen aspect adjusted uv
+                float2 aspectUV = uv * _CloudRTSize.xy * textureResReciprocal; // Screen aspect adjusted uv
                 float noise = SAMPLE_TEXTURE2D(_Blue, sampler_Blue, aspectUV).x; // bilinear sample for smoother noise
                 return frac(noise + float(totalFrameCount) * goldenRatioCondjugate);
             }
@@ -294,8 +306,8 @@ Shader "Custom/SH_Clouds"
             float3 ambientLighting(float3 worldPosition)
             {
                 float worldPositionY = worldPosition.y;
-                float boundsMiddleY = boundsPosition.y;
-                float halfHeight = boundsSize.y;
+                float boundsMiddleY = _BoundsPosition.y;
+                float halfHeight = _BoundsSize.y;
 
                 float top = boundsMiddleY + halfHeight;
                 float bot = boundsMiddleY - halfHeight;
@@ -330,7 +342,7 @@ Shader "Custom/SH_Clouds"
                 float adjustedStepLength = AdjustLightStepLength(_LightrayStepLength, cameraDistance / _FarPlane);
                 
                 float distanceToLightTraveled = debanding * adjustedStepLength; // increment avoids sampling at known position
-                float distanceWithinBox = RaycastIntersectBox(boundsPosition, boundsSize, lightrayOrigin, lightDir).y;
+                float distanceWithinBox = RaycastIntersectBox(_BoundsPosition, _BoundsSize, lightrayOrigin, lightDir).y;
                 float maxLightMarchDistance = min(_maxLightmarchDistance, distanceWithinBox - adjustedStepLength);
                 
                 [loop] while (distanceToLightTraveled < maxLightMarchDistance)
@@ -342,6 +354,9 @@ Shader "Custom/SH_Clouds"
                     float density = SampleDensity(lightRayPosition);
                     float beerLambert = BeerLambert(density * adjustedStepLength);
                     lightrayTransmittance *= beerLambert;
+                    
+                    if (lightrayTransmittance <= _LightmarchDensityThreshold)
+                        break; 
                     
                 }
                 // done matching towards lightsource
@@ -360,7 +375,7 @@ Shader "Custom/SH_Clouds"
 
                 rayLength = min(rayLength, _FarPlane); // limit everything to a far plane
  
-                float2 intersect = RaycastIntersectBox(boundsPosition, boundsSize, rayOrigin, rayDir);
+                float2 intersect = RaycastIntersectBox(_BoundsPosition, _BoundsSize, rayOrigin, rayDir);
                 float distanceToBox = intersect.x;
                 float distanceWithinBox = intersect.y;
                 float maxDistanceToBox = distanceToBox + distanceWithinBox;
@@ -385,6 +400,10 @@ Shader "Custom/SH_Clouds"
                 float firstStep = AdjustStepLength(_StepLength, distanceToBox);
                 float distanceTraveled = distanceToBox + debanding * firstStep;
                 float maxRayDist = min(maxDistanceToBox, min(distanceToBox + _TroughBoxMaxDistance, rayLength));
+
+                int lightStepIndex = 0;
+                float lastLightmarchTransmittance = 0.0;
+                int sampleEvery = max(1, _sampelEveryNSteps);
                 
                 [loop] while (distanceTraveled < maxRayDist)
                 {
@@ -402,7 +421,7 @@ Shader "Custom/SH_Clouds"
                     {
                         float t = distanceToBox;
                         
-                        uint idx = 0;
+                        uint idx = 0; 
                         [loop] while (t < distanceTraveled && idx < 4128) // cap for safety
                         {
                             t += AdjustStepLength(_StepLength, t);
@@ -410,8 +429,9 @@ Shader "Custom/SH_Clouds"
                         }
 
                         float seed = (float)idx;
-                        float3 rndColor = float3(Hash(seed), Hash(seed + 13.37), Hash(seed + 67.420));
-                        debugColor = rndColor * (1 - (distanceTraveled / maxRayDist));
+                        float noise = Hash(seed);
+                        float3 rndColor = float3(noise, frac(noise + 13.37), frac(noise + 67.420));
+                        debugColor = rndColor * (1.0 - (distanceTraveled / maxRayDist));
 
                         if (t < _StepLengthFalloffSafeRadius)
                             debugColor = float4(1.0, 0.0, 0.0, 0.0);
@@ -420,22 +440,33 @@ Shader "Custom/SH_Clouds"
                     }
                     // debug coloring end
                     
-                    float lightrayTransmittance = TowardsLightRaymarch(lightDir, frac(debanding * 987.6543), rayPosition, distanceTraveled); // reshash debanding 
                     
                     float beerLambert = BeerLambert(density * adjustedStepLength);
-                    float absoption = 1.0 - beerLambert; // absoption is oposite of transmittance
+                    float absorption = 1.0 - beerLambert; // absorption is oposite of transmittance
+                    if (absorption < 0.002)
+                    {
+                        transmittance *= beerLambert;
+                        continue; // opt out early since absorption removes ≈all in scattering when close to zero
+                    }
+
+                    if (lightStepIndex % sampleEvery == 0)
+                        lastLightmarchTransmittance = TowardsLightRaymarch(lightDir, frac(debanding * 69.67420), rayPosition, distanceTraveled); // reshash debanding 
+                    lightStepIndex++; // increment when lightraymaching could have been preformed
                     
                     float powder = lerp(1.0, Powder(density * adjustedStepLength), -_PowderStregth);
-                    float3 sunAmountHere = mainLight.color * lightrayTransmittance * powder;
+                    float3 sunAmountHere = mainLight.color * lastLightmarchTransmittance * powder;
                     float3 ambient = ambientLighting(rayPosition);
-                    float3 scatter = (sunAmountHere * HG + ambient) * absoption * _CloudColor;
+                    float3 scatter = (sunAmountHere * HG + ambient) * absorption * _CloudColor;
                     
-                    inScattering += transmittance * scatter;
+                    inScattering += scatter * transmittance;
                     transmittance *= beerLambert;
+
+                    if (transmittance <= _DensityThreshold)
+                        break;
                 }
 
                 float3 cloudColor = _VisualizeStepLength ? debugColor : inScattering;
-                float alpha = (transmittance.r + transmittance.r + transmittance.r) * (1.0 / 3.0);
+                float alpha = transmittance;
                 if (_VisualizeStepLength)
                 {
                     alpha = 1 - (cloudColor.r + cloudColor.g + cloudColor.b) * (1 / 3);

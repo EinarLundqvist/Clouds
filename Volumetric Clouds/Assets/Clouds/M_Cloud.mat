@@ -47,13 +47,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _DensityExitThreshold: 0.05
     - _DensityFalloffFromBounds: 196
     - _DensityFalloffSmoothness: 328
     - _DensityFarplaneFalloff: 0
-    - _DensityMultiplier: 0.7
+    - _DensityMultiplier: 0.8
+    - _DensityThreshold: 0.01
     - _DetailErotionStrength: -0.306
     - _DetailNoiseRenderDistance: 14238
-    - _DetailNoiseScale: 10
+    - _DetailNoiseScale: 15
     - _DetailNoiseThreshold: 0
     - _DetailNoiseUseDistance: 8632
     - _ErotionStrength: -0.228
@@ -63,6 +65,7 @@ Material:
     - _LargeMaskSharpness: 1.28
     - _LightAbsorption: 1
     - _LightmachingRenderDistance: 13115
+    - _LightmarchDensityThreshold: 0.03
     - _LightrayStepFalloffSafeRadius: 500
     - _LightrayStepLength: 5
     - _LightrayStepLengthFalloff: 1
@@ -91,6 +94,8 @@ Material:
     - _VisualizeStepLength: 0
     - _maxLightmarchDistance: 75
     - _maxToLightSearchDistance: 50
+    - _sampelEveryNSteps: 2
+    - _test: 0
     - _toLightSearchDistance: 75
     m_Colors:
     - _AmbientBottom: {r: 1, g: 1, b: 1, a: 1}

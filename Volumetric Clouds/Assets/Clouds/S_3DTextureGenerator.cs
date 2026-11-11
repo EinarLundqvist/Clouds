@@ -31,7 +31,7 @@ public class S_3DTextureGenerator : MonoBehaviour
         Texture3D texture = new Texture3D(size, size, size, textureFormat, false);
         texture.wrapMode = wrapMode;
         texture.filterMode = filterMode;
-        texture.name = "CloudNoise";
+        texture.name = assetName;
 
         // Create a 3-dimensional flat array to store color data
         float[] density = new float[size * size * size];

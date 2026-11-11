@@ -3,7 +3,8 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
 using UnityEngine.Rendering.RenderGraphModule.Util;
 using UnityEngine.Rendering.Universal;
-public class S_CloudRenderPass : ScriptableRendererFeature
+using UnityEngine.Experimental.Rendering;
+public class S_CloudRenderFeature : ScriptableRendererFeature
 {
     public Material material;
     [Range(1, 4)] public int downSampleFactor;
@@ -26,8 +27,11 @@ public class S_CloudRenderPass : ScriptableRendererFeature
             cloudsRTdescription.height /= resolutionDownsampleFactor;
             cloudsRTdescription.msaaSamples = MSAASamples.None;
             cloudsRTdescription.depthBufferBits = DepthBits.None;
+            cloudsRTdescription.colorFormat = GraphicsFormat.R16G16B16A16_SFloat;
 
             TextureHandle cloudTex = renderGraph.CreateTexture(cloudsRTdescription);
+            
+            mat.SetVector("_CloudRTSize", new Vector4(cloudsRTdescription.width, cloudsRTdescription.height, 1.0f / cloudsRTdescription.width, 1.0f / cloudsRTdescription.height)); // send new resolution to shader 
 
             renderGraph.AddBlitPass(new RenderGraphUtils.BlitMaterialParameters(screenColorTex, cloudTex, mat, 0), "Effect");
 
@@ -54,6 +58,7 @@ public class S_CloudRenderPass : ScriptableRendererFeature
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData data)
     {
         pass.mat = material;
+
         pass.resolutionDownsampleFactor = Mathf.Max(downSampleFactor, 1);
         renderer.EnqueuePass(pass);
     }
