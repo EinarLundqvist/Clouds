@@ -22,10 +22,10 @@ public class BoxIntersection : MonoBehaviour
     [SerializeField] private Transform boundingBox;
     [SerializeField] private Box currentBounds;
     [SerializeField] Light mainLight;
-    [SerializeField, Range(0.1f, 20.0f)] private float stepLength = 0.5f;
-    [SerializeField, Range(0.1f, 100.0f)] private float maxMarchDistance = 50.0f;
-    [SerializeField, Range(1, 10)] private float toLightSearchDistance = 5;
-    [SerializeField, Range(0.1f, 10.0f)] private float stepLengthToLight = 1.0f;
+    [SerializeField, Range(10f, 2000.0f)] private float stepLength = 0.5f;
+    [SerializeField, Range(10f, 10000.0f)] private float maxMarchDistance = 50.0f;
+    [SerializeField, Range(10, 1000)] private float toLightSearchDistance = 5;
+    [SerializeField, Range(10f, 1000.0f)] private float stepLengthToLight = 1.0f;
     [SerializeField] private Mesh arrowMesh;
     
     private Vector3 entryPosition = Vector3.zero;
@@ -50,9 +50,9 @@ public class BoxIntersection : MonoBehaviour
         {
             Gizmos.DrawLine(entryPosition, entryPosition + transform.forward * Vector3.Distance(entryPosition, exitPosition));
             Gizmos.color = Color.green;
-            Gizmos.DrawSphere(entryPosition, 0.2f);
+            Gizmos.DrawSphere(entryPosition, 20f);
             Gizmos.color = Color.red;
-            Gizmos.DrawSphere(exitPosition, 0.2f);
+            Gizmos.DrawSphere(exitPosition, 20f);
         }
         Gizmos.color = Color.red;
         Gizmos.DrawIcon(transform.position + transform.forward * maxMarchDistance, "CrossIcon");
@@ -84,7 +84,7 @@ public class BoxIntersection : MonoBehaviour
 
                 float traveledDistance = distanceToLightTraveled / maxLightMarchDistance;
                 Gizmos.color = new Color(traveledDistance, 0.0f, traveledDistance);
-                Gizmos.DrawMesh(arrowMesh, 0, lightRayPosition, Quaternion.LookRotation(-transform.up, lightDir) * Quaternion.Euler(0, 0, 90.0f), Vector3.one * 0.2f);
+                Gizmos.DrawMesh(arrowMesh, 0, lightRayPosition, Quaternion.LookRotation(-transform.up, lightDir) * Quaternion.Euler(0, 0, 90.0f), Vector3.one * 20f);
             }
             Gizmos.color = new Color(0.15f, 0.0f, 0.15f);
             Gizmos.DrawLine(rayPosition, rayPosition + lightDir * distanceToLightTraveled);
@@ -92,7 +92,7 @@ public class BoxIntersection : MonoBehaviour
             float normalizedDistanceTraveled = distanceTraveled / maxRayDist;
             float brightnessBoost = 0.3f;
             Gizmos.color = new Color(normalizedDistanceTraveled + brightnessBoost, 1 - normalizedDistanceTraveled + brightnessBoost, 1 - normalizedDistanceTraveled + brightnessBoost);
-            Gizmos.DrawSphere(rayPosition, normalizedDistanceTraveled * 0.15f + 0.05f);
+            Gizmos.DrawSphere(rayPosition, normalizedDistanceTraveled * 20f + 5f);
             distanceTraveled += stepLength;
             
         }

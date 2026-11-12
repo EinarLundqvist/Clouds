@@ -68,7 +68,7 @@ MonoBehaviour:
   m_Name: S_CloudRenderPass
   m_EditorClassIdentifier: Assembly-CSharp::S_CloudRenderPass
   m_Active: 1
-  material: {fileID: 2100000, guid: 29274085d71c3dd469cfdcc08a932f2e, type: 2}
+  material: {fileID: 0}
   downSampleFactor: 2
 --- !u!114 &6248357224422833712
 MonoBehaviour:

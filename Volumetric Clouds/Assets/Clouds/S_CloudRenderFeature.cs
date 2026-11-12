@@ -4,10 +4,12 @@ using UnityEngine.Rendering.RenderGraphModule;
 using UnityEngine.Rendering.RenderGraphModule.Util;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Experimental.Rendering;
+using System.Runtime.InteropServices.WindowsRuntime;
 public class S_CloudRenderFeature : ScriptableRendererFeature
 {
-    public Material material;
+    [HideInInspector] public Material material;
     [Range(1, 4)] public int downSampleFactor;
+    [HideInInspector] private S_CloudRenderer cloudRenderer;
     class CompositePassData
     {
         public Material mat;
@@ -57,7 +59,16 @@ public class S_CloudRenderFeature : ScriptableRendererFeature
     }
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData data)
     {
-        pass.mat = material;
+        if (cloudRenderer == null)
+            cloudRenderer = FindFirstObjectByType<S_CloudRenderer>();
+
+        if (cloudRenderer == null)
+        {
+            Debug.LogError("No shader found, Assign cloudFullscreenMaterial in CloudRenderer");
+            return;
+        }
+        
+        pass.mat = cloudRenderer.fullscreenPass;
 
         pass.resolutionDownsampleFactor = Mathf.Max(downSampleFactor, 1);
         renderer.EnqueuePass(pass);

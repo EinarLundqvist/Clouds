@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_CloudSmall
+  m_Shader: {fileID: 4800000, guid: 1e803e50c1721df4989f7edf4ca4d7b6, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _USEDETAILNOISE_ON
+  - _USELARGEMASKNOISE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Blue:
+        m_Texture: {fileID: 2800000, guid: 8ac234debdb478d4c8b5408c8157e58a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CloudNoise:
+        m_Texture: {fileID: 11700000, guid: 076e48bc4b67bc34a924a7e5eb83c02f, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CloudNoise2:
+        m_Texture: {fileID: 11700000, guid: 273e0097460d1ce47b77f0c3bd72ba9d, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CloudNoise3:
+        m_Texture: {fileID: 11700000, guid: 21a77ef330b6c93439562ef693b159ba, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CurlNoise:
+        m_Texture: {fileID: 2800000, guid: 7e14ae99c63f874489e5bb0f7af223fd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BackScattering: 0.5
+    - _CurlScale: 15
+    - _CurlStrength: 150
+    - _DensityExitThreshold: 0.05
+    - _DensityFalloffFromBounds: 261
+    - _DensityFalloffSmoothness: 328
+    - _DensityFarplaneFalloff: 0
+    - _DensityMultiplier: 0.5
+    - _DensityThreshold: 0.01
+    - _DetailErotionStrength: 0.34
+    - _DetailNoiseRenderDistance: 14238
+    - _DetailNoiseScale: 15
+    - _DetailNoiseThreshold: 0
+    - _DetailNoiseUseDistance: 8632
+    - _DualLobeRatio: 0.5
+    - _ErotionStrength: -0.228
+    - _FarPlane: 30000
+    - _LargeMaskNoiseScale: 0.94
+    - _LargeMaskNoiseThreshold: 0.121
+    - _LargeMaskSharpness: 1.28
+    - _LightAbsorption: 1
+    - _LightmachingRenderDistance: 13115
+    - _LightmarchDensityThreshold: 0.03
+    - _LightrayStepFalloffSafeRadius: 500
+    - _LightrayStepLength: 5
+    - _LightrayStepLengthFalloff: 1
+    - _MaxLightrayStepLength: 100
+    - _MaxMarchDistance: 9666
+    - _MaxStepLength: 200
+    - _NoiseScale: 3
+    - _NoiseScale2: 10.01
+    - _NoiseThreshold: 0.438
+    - _NoiseThreshold2: 0
+    - _PowderStregth: 2.5
+    - _Scattering: 0.7
+    - _ScatteringStrength: 1.75
+    - _ShapeNoiseScale: 3
+    - _ShapeNoiseThreshold: 0.288
+    - _SliceDetailFalloff: 1
+    - _StepLength: 10
+    - _StepLengthFalloff: 2
+    - _StepLengthFalloffSafeRadius: 500
+    - _StepsTowardsLight: 7
+    - _TroughBoxMaxDistance: 20000
+    - _UseDetailNoise: 1
+    - _UseLargeMaskNoise: 1
+    - _UseNoise: 1
+    - _UseNoise2: 0.055
+    - _VisualizeStepLength: 0
+    - _maxLightmarchDistance: 75
+    - _maxToLightSearchDistance: 50
+    - _sampelEveryNSteps: 0
+    - _test: 0
+    - _toLightSearchDistance: 75
+    m_Colors:
+    - _AmbientBottom: {r: 1, g: 1, b: 1, a: 1}
+    - _AmbientTop: {r: 0.43794644, g: 0.476875, b: 0.545, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _CloudColor: {r: 0.933, g: 0.933, b: 0.933, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

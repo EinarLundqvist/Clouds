@@ -45,19 +45,27 @@ Material:
         m_Texture: {fileID: 11700000, guid: 21a77ef330b6c93439562ef693b159ba, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _CurlNoise:
+        m_Texture: {fileID: 2800000, guid: 7e14ae99c63f874489e5bb0f7af223fd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _BackScattering: 0.5
+    - _CurlScale: 15
+    - _CurlStrength: 150
     - _DensityExitThreshold: 0.05
     - _DensityFalloffFromBounds: 196
     - _DensityFalloffSmoothness: 328
     - _DensityFarplaneFalloff: 0
-    - _DensityMultiplier: 0.8
+    - _DensityMultiplier: 0.4
     - _DensityThreshold: 0.01
-    - _DetailErotionStrength: -0.306
+    - _DetailErotionStrength: 0.34
     - _DetailNoiseRenderDistance: 14238
     - _DetailNoiseScale: 15
     - _DetailNoiseThreshold: 0
     - _DetailNoiseUseDistance: 8632
+    - _DualLobeRatio: 0.5
     - _ErotionStrength: -0.228
     - _FarPlane: 30000
     - _LargeMaskNoiseScale: 0.94
@@ -76,11 +84,11 @@ Material:
     - _NoiseScale2: 10.01
     - _NoiseThreshold: 0.438
     - _NoiseThreshold2: 0
-    - _PowderStregth: 3
+    - _PowderStregth: 2.5
     - _Scattering: 0.7
-    - _ScatteringStrength: 0.175
+    - _ScatteringStrength: 1.75
     - _ShapeNoiseScale: 3
-    - _ShapeNoiseThreshold: 0.438
+    - _ShapeNoiseThreshold: 0.288
     - _SliceDetailFalloff: 1
     - _StepLength: 10
     - _StepLengthFalloff: 2
