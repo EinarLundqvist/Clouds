@@ -20,7 +20,7 @@ public class S_3DTextureGenerator : MonoBehaviour
 
     private void OnValidate()
     {
-        if (autoGenerate)
+        if (autoGenerate && Application.isEditor) // editor gets stuck importing assets if not in editor
             CreateTexture3D();
     }
     public void CreateTexture3D()

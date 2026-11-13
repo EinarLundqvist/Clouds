@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: M_AltoCumulus
+  m_Name: M_StratoCirrus
   m_Shader: {fileID: 4800000, guid: 8ef8a64ff3e12714f9675e2669f40714, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -123,20 +123,20 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 0
-    - _Scattering: 0.6
-    - _ScatteringStrength: 0.5
+    - _Scattering: 0.07
+    - _ScatteringStrength: 1
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _SrcBlendAlpha: 1
     - _Surface: 1
-    - _Tiling: 0.26
+    - _Tiling: 0.41
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 0.43137255}
     - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0.5714526, g: 0.57802105, b: 0.624, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}

@@ -61,10 +61,10 @@ Shader "Custom/SH_Alto"
                 return OUT;
             }
 
-            //                    1 - g^2 
-            //  p(θ) = ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            //         4π(1 + g^2 - 2g * cos(θ))^3/2                         // θ is the original trajectory   
-            float HenyeyGreenstein(float3 lightDir, float3 viewDir, float g) // g is scattering factor, between -1 & 1
+            //                    1 - g^2                    θ is the original trajectory 
+            //  p(θ) = ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━        
+            //         4π(1 + g^2 - 2g * cos(θ))^3/2                      ↓ scattering factor, between -1 & 1
+            float HenyeyGreenstein(float3 lightDir, float3 viewDir, float g)
             {
                 // dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z
                 // which is geometricly
@@ -73,9 +73,9 @@ Shader "Custom/SH_Alto"
                 // dot(a, b) = cos(θ)
                 float cosTheta = dot(lightDir, viewDir);
 
-                const float pi = 3.14159265358979323;
-                float denominator = 1.0 + g * g - 2.0 * g * cosTheta; // split up because pemdas isnt respected here 
-                return (1.0 - g * g) / (pi * 4.0 * pow(denominator, 1.5)) * _ScatteringStrength;
+                static const float pi = 3.14159265358979323;
+                const float g2 = g * g;
+                return (1.0 / (4.0 * pi)) * ((1.0 - g2) / pow(1.0 + g2 - 2.0 * g * cosTheta, 1.5)) * _ScatteringStrength;
             }
 
             half4 frag(Varyings IN) : SV_Target

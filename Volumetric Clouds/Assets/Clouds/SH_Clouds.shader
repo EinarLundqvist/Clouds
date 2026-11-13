@@ -56,6 +56,7 @@ Shader "Custom/SH_Clouds"
         
         [Space(20)]
         [Header(Noise)]
+        _ScrollSpeed ("Scroll Speed", Range(0.0, 0.1)) = 0.01
         [Space(5)]
         _CurlNoise ("Curl Noise", 2D) = "white" {}
         _CurlStrength ("Curl Strength", Range(0.0, 2020.0)) = 0.5
@@ -151,6 +152,9 @@ Shader "Custom/SH_Clouds"
                 float3 _CloudColor;
                 float3 _AmbientBottom;
                 float3 _AmbientTop;
+
+                // NOISE
+                float _ScrollSpeed;
 
                 // curl noise 
                 float _CurlStrength;
@@ -257,7 +261,7 @@ Shader "Custom/SH_Clouds"
 
             float3 Curl(float3 UVW)
             {
-                float2 uv  = UVW.xy - _Time.yy * 0.01;
+                float2 uv  = UVW.xy + _Time.yy * _ScrollSpeed / 2.0;
                 float2 curl = (SAMPLE_TEXTURE2D(_CurlNoise, sampler_CurlNoise, uv * _CurlScale * 0.0001).rg - 1.0) * 0.5;
                 return UVW + float3(curl.x, 0, -curl.y) * _CurlStrength;
             }
@@ -298,7 +302,7 @@ Shader "Custom/SH_Clouds"
                     if (UseCurl)
                         UVW = Curl(UVW);
 
-                    float3 detailUVW = UVW * _DetailNoiseScale * 0.0001 + _Time.yyy * 0.01;
+                    float3 detailUVW = UVW * _DetailNoiseScale * 0.0001 + _Time.yyy * _ScrollSpeed;
                     detailShapes = saturate(SAMPLE_TEXTURE3D(_CloudNoise2, sampler_CloudNoise2, detailUVW) - _DetailNoiseThreshold);
                 }
 

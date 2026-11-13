@@ -69,7 +69,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::S_CloudRenderPass
   m_Active: 1
   material: {fileID: 0}
-  downSampleFactor: 2
+  downSampleFactor: 3
 --- !u!114 &6248357224422833712
 MonoBehaviour:
   m_ObjectHideFlags: 0

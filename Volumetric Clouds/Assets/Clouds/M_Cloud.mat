@@ -67,7 +67,7 @@ Material:
     - _DetailNoiseUseDistance: 8632
     - _DualLobeRatio: 0.5
     - _ErotionStrength: -0.228
-    - _FarPlane: 30000
+    - _FarPlane: 20000
     - _LargeMaskNoiseScale: 0.94
     - _LargeMaskNoiseThreshold: 0.121
     - _LargeMaskSharpness: 1.28
@@ -87,6 +87,7 @@ Material:
     - _PowderStregth: 2.5
     - _Scattering: 0.7
     - _ScatteringStrength: 1.75
+    - _ScrollSpeed: 0.02
     - _ShapeNoiseScale: 3
     - _ShapeNoiseThreshold: 0.288
     - _SliceDetailFalloff: 1
