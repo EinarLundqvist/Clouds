@@ -8,7 +8,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 public class S_CloudRenderFeature : ScriptableRendererFeature
 {
     [HideInInspector] public Material material;
-    [Range(1, 4)] public int downSampleFactor;
+    [Range(1, 8)] public int downSampleFactor;
     [HideInInspector] private S_CloudRenderer cloudRenderer;
     class CompositePassData
     {
@@ -60,11 +60,8 @@ public class S_CloudRenderFeature : ScriptableRendererFeature
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData data)
     {
         if (cloudRenderer == null)
-            cloudRenderer = FindFirstObjectByType<S_CloudRenderer>();
-
-        if (cloudRenderer == null)
         {
-            Debug.LogError("No shader found, Assign cloudFullscreenMaterial in CloudRenderer");
+            cloudRenderer = FindFirstObjectByType<S_CloudRenderer>();
             return;
         }
         

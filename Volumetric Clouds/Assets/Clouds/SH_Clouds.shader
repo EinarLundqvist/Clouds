@@ -92,6 +92,11 @@ Shader "Custom/SH_Clouds"
         {
             HLSLPROGRAM
 
+
+            // TODO: 
+            // Atmospheric fog with mie-scattering
+            // Bilateral upsampling
+
             #pragma vertex Vert
             #pragma fragment frag
 

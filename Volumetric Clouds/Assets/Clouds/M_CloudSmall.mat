@@ -87,6 +87,7 @@ Material:
     - _PowderStregth: 2.5
     - _Scattering: 0.7
     - _ScatteringStrength: 1.75
+    - _ScrollSpeed: 0.01
     - _ShapeNoiseScale: 3
     - _ShapeNoiseThreshold: 0.288
     - _SliceDetailFalloff: 1

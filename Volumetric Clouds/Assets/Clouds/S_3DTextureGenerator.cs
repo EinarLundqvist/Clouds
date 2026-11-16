@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class S_3DTextureGenerator : MonoBehaviour
 {
-    [SerializeField] private bool autoGenerate = false;
+    [SerializeField] private bool autoRegenerate = false;
     [Space]
     [SerializeField] private int resolution = 32;
     [SerializeField] TextureFormat textureFormat = TextureFormat.RFloat;
@@ -20,7 +20,7 @@ public class S_3DTextureGenerator : MonoBehaviour
 
     private void OnValidate()
     {
-        if (autoGenerate && Application.isEditor) // editor gets stuck importing assets if not in editor
+        if (autoRegenerate && Application.isEditor) // editor gets stuck importing assets if not in editor
             CreateTexture3D();
     }
     public void CreateTexture3D()
