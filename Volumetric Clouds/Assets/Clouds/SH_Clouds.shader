@@ -531,9 +531,38 @@ Shader "Custom/SH_Clouds"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+
+            float4 _CloudRTSize;
 
             half4 frag(Varyings IN) : SV_Target
             {
+                // Joint bilateral upsampling
+                /*
+                float2 downsampleSize = _ScreenParams.xy / 4.0;
+                float2 lowResUV = (floor(IN.texcoord * downsampleSize) + 0.5) / downsampleSize;
+                
+                float highResZ = LinearEyeDepth(SampleSceneDepth(IN.texcoord), _ZBufferParams);
+                
+                float4 best = float4(1, 0, 1, 1);
+                float bestDiff = 1e9;
+                for (int x = 0; x < 2; x++)
+                for (int y = 0; y < 2; y++)
+                {
+                    float2 offset = float2(x, y);
+                    lowResUV += (offset + 0.5) * (1.0 / _CloudRTSize);
+                    lowResUV /= downsampleSize;
+                    float LowResZ = LinearEyeDepth(SampleSceneDepth(lowResUV), _ZBufferParams);
+                    
+                    float diff = abs(LowResZ - highResZ);
+                    if (diff < bestDiff)
+                    {
+                        bestDiff = diff;
+                        best = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, IN.texcoord);
+                    }
+                }
+                return best;*/
+
                 return SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, IN.texcoord);
             }
             ENDHLSL
