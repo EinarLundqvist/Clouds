@@ -521,13 +521,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 576569387}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.14714527, y: 0.10703919, z: 0.00252847, w: 0.98330283}
-  m_LocalPosition: {x: -250, y: -256, z: -1124}
+  m_LocalRotation: {x: -0.22027558, y: 0.10692848, z: -0.005484192, w: 0.9695437}
+  m_LocalPosition: {x: -250, y: -253.16061, z: -1119.4602}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -16.853, y: 12.66, z: -1.588}
+  m_LocalEulerAnglesHint: {x: -25.211, y: 13.406, z: -3.659}
 --- !u!33 &576569390
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -997,7 +997,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd56569a785c0e439dbfd40c64dac07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::S_CloudNoiseGeneratior
-  autoGenerate: 1
+  autoRegenerate: 0
   resolution: 64
   textureFormat: 18
   wrapMode: 0
@@ -1052,7 +1052,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd56569a785c0e439dbfd40c64dac07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::S_3DTextureGenerator
-  autoGenerate: 1
+  autoRegenerate: 0
   resolution: 8
   textureFormat: 18
   wrapMode: 0
@@ -1143,7 +1143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bd56569a785c0e439dbfd40c64dac07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::S_CloudNoiseGeneratior
-  autoGenerate: 1
+  autoRegenerate: 0
   resolution: 32
   textureFormat: 18
   wrapMode: 0
