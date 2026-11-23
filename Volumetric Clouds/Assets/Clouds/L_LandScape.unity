@@ -377,7 +377,7 @@ GameObject:
   - component: {fileID: 109946446}
   - component: {fileID: 109946445}
   m_Layer: 0
-  m_Name: -- Cirrus Layer --
+  m_Name: cirroCumulus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1721,6 +1721,9 @@ MonoBehaviour:
   boundsBox: {fileID: 1960489369}
   boundsSize: {x: 300000, y: 1169.0696, z: 300000}
   boundsPosition: {x: 0, y: 1282.1, z: 0}
+  cirroCumulus: {fileID: 109946444}
+  AltoStratus: {fileID: 1022329431}
+  shouldRender: 1
 --- !u!4 &984854352
 Transform:
   m_ObjectHideFlags: 0
@@ -1749,7 +1752,7 @@ GameObject:
   - component: {fileID: 1022329433}
   - component: {fileID: 1022329432}
   m_Layer: 0
-  m_Name: -- Cirrus Layer -- (1)
+  m_Name: AltoStratus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

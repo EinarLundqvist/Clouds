@@ -63,6 +63,9 @@ public class S_CloudRenderFeature : ScriptableRendererFeature
             cloudRenderer = FindFirstObjectByType<S_CloudRenderer>();
             return;
         }
+
+        if (!cloudRenderer.shouldRender)
+            return;
         
         pass.mat = cloudRenderer.fullscreenPass;
 
